@@ -722,6 +722,11 @@
     <div id="notification"></div>
     <div id="flash-overlay"></div>
 
+    <div id="no-battle" class="overlay">
+      <h1>НЕТ БИТВЫ</h1>
+      <div class="result">СЕЙЧАС НЕТ АКТИВНОЙ БИТВЫ<br>ЗАКРОЙТЕ ИГРУ И ПОПРОБУЙТЕ ПОЗЖЕ</div>
+    </div>
+
     <div id="battle-start" class="overlay show">
       <h1>ОХОТА</h1>
       <div class="result">ГОТОВ?<br>НАЖМИ ЧТОБЫ НАЧАТЬ</div>
@@ -739,39 +744,43 @@
 
   <script>
     const tg = window.Telegram.WebApp;
-
     tg.ready();
     tg.expand();
 
-    const user = tg.initDataUnsafe?.user;
-    const rawData = tg.initDataUnsafe?.start_param;
+    const BATTLE_API_URL = (window.BATTLE_API_URL || "").replace(/\/$/, "");
+    const initData = tg.initData || "";
+    let battle = null, tg_data = {}, apiReady = false, battleSeed = 0, logFlushInFlight = false;
 
-    var tg_data = {};
-    if (!rawData === undefined) {
-      const params = new URLSearchParams(rawData);
-
-      for (const [key, value] of params.entries()) {
-        try {
-          tg_data[key] = JSON.parse(value);
-        } catch {
-          tg_data[key] = value;
-        }
-      }
-
-    } else {
-      tg_data = {
-        "energy_left": 10,
-        "monster_name": "Оборванец",
-        "monster_id": "6",
-        "monster_hp": 350,
-        "is_boss": false,
-        "money_drop": 33,
-        "items_drop": ["⚡️КОЛОТУШКА"]
+    function parseBattleData(data) {
+      if (data == null) return {};
+      if (typeof data === "object") return data;
+      try { return JSON.parse(data); } catch (_) { return {}; }
+    }
+    async function apiRequest(path, options = {}) {
+      if (!initData) throw new Error("Telegram initData is unavailable");
+      const response = await fetch(`${BATTLE_API_URL}${path}`, { ...options, headers: { "Content-Type": "application/json", "X-Init-Data": initData, ...(options.headers || {}) } });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.detail || `HTTP ${response.status}`);
+      return payload;
+    }
+    async function loadBattle() {
+      try {
+        const payload = await apiRequest("/battle"); battle = payload.battle;
+        if (!battle) { document.getElementById("battle-start").classList.remove("show"); document.getElementById("no-battle").classList.add("show"); return false; }
+        tg_data = parseBattleData(battle.data);
+        if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) throw new Error("Invalid battle data");
+        tg_data.money_drop = tg_data.money_drop ?? 0;
+        tg_data.items_drop = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
+        document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
+        if (tg_data.monster_id != null) document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+        battleSeed = Number(payload.battle.seed || 0) >>> 0;
+        apiReady = true; return true;
+      } catch (error) {
+        console.error("[battle] load failed", error);
+        document.getElementById("battle-start").classList.remove("show"); document.getElementById("no-battle").classList.add("show");
+        document.querySelector("#no-battle .result").innerHTML = "НЕ УДАЛОСЬ ЗАГРУЗИТЬ БИТВУ<br>ПОПРОБУЙТЕ ОТКРЫТЬ ИГРУ ЕЩЁ РАЗ"; return false;
       }
     }
-
-    document.getElementById('enemy-label').innerText = tg_data.monster_name;
-    document.getElementById('slider-monster').src = `assets/${tg_data.monster_id}.png`;
   </script>
 
   <script>
@@ -780,7 +789,8 @@
       currentCue: null, isGameOver: false, isVictory: false,
       difficulty: 1, combo: 0, bestCombo: 0, swipeStart: null, swipeRay: -1, startTimer: null,
       audio: null, lastCueTarget: -1,
-      slider: { zones: [], position: .5, active: false, roundStart: 0, rafId: null, drag: false }
+      slider: { zones: [], position: .5, active: false, roundStart: 0, rafId: null, drag: false },
+      log: [], logSent: 0, sessionStartedAt: 0, finished: false, nextSeq: 1, roundIndex: 0
     };
     const STAR_ANGLES = [-90, -18, 54, 126, 198];
     const CX = 100, CY = 100, R_TIP = 97, R_MID = 40, RAY_W = 6.5;
@@ -862,7 +872,50 @@
     function cueTick(p) { tone(280 + p * 170, .035, "sine", .018); haptic(5) }
     function hitSound(perfect = false) { tone(perfect ? 760 : 480, perfect ? .12 : .07, perfect ? "triangle" : "square", perfect ? .055 : .03); if (perfect) { setTimeout(() => tone(1120, .1, "triangle", .035), 35); haptic([12, 28, 12]) } else haptic(8) }
 
+    function gameLog(action, extra = {}) {
+      const entry = { seq: state.nextSeq++, ts: Date.now(), action, ...extra };
+      state.log.push(entry);
+      console.debug("[battle-log]", entry);
+      if (state.log.length - state.logSent >= 10) void flushLogs(false);
+    }
+    async function flushLogs(force = false) {
+      if (logFlushInFlight || !apiReady || !battle || state.logSent >= state.log.length || (!force && state.log.length - state.logSent < 10)) return;
+      logFlushInFlight = true;
+      const start = state.logSent;
+      const batch = state.log.slice(start);
+      try {
+        await apiRequest("/battle/log", { method: "POST", body: JSON.stringify({ logs: batch }) });
+        state.logSent = Math.max(state.logSent, start + batch.length);
+      } catch (error) {
+        console.warn("[battle-log] send failed", error);
+      } finally {
+        logFlushInFlight = false;
+        if (force && state.logSent < state.log.length) void flushLogs(true);
+      }
+    }
+    async function finishBattle(result) {
+      if (state.finished || !apiReady || !battle) return;
+      state.finished = true;
+      gameLog(result === "victory" ? "victory" : "death", {
+        combo: state.bestCombo,
+        extra: { enemy_hp: state.enemyHP, max_hp: state.enemyMaxHP }
+      });
+      // Отправляем только ещё не подтверждённые сервером события.
+      try {
+        const payload = await apiRequest("/battle/finish", {
+          method: "POST",
+          body: JSON.stringify({ result, logs: state.log })
+        });
+        state.logSent = state.log.length;
+        console.info("[battle] finish validation", payload.validation);
+      } catch (error) {
+        console.error("[battle] finish failed", error);
+      }
+    }
+    window.addEventListener("pagehide", () => { flushLogs(true); });
+
     function startGame() {
+      state.finished = false; state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0; logFlushInFlight = false;
       clearTimeout(state.startTimer);
       if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
       if (state.slider?.rafId) cancelAnimationFrame(state.slider.rafId);
@@ -900,7 +953,8 @@
     }
 
     function beginBattle() {
-      initAudio();
+      if (!apiReady || !battle) return; state.sessionStartedAt = Date.now();
+      gameLog("start", { extra: { battle_id: battle.id, game_mode: GAME_MODE, hp: state.enemyMaxHP } }); initAudio();
       state.audio?.resume();
       battleStartOverlay.classList.remove("show");
 
@@ -933,45 +987,37 @@
       };
     }
 
+    function seededRandom(seed) {
+      let x = seed >>> 0;
+      return function () {
+        x ^= (x << 13) >>> 0;
+        x ^= x >>> 17;
+        x ^= (x << 5) >>> 0;
+        x >>>= 0;
+        return x / 4294967296;
+      };
+    }
     function makeSliderZones() {
       const { zones: count } = sliderDifficulty();
+      const roundIndex = state.roundIndex;
+      const rng = seededRandom((battleSeed ^ Math.imul(roundIndex + 1, 0x9E3779B9)) >>> 0);
       const zones = [];
       let attempts = 0;
 
       while (zones.length < count && attempts++ < 500) {
-        const width = SLIDER_CONFIG.minZoneWidth + Math.random() * (SLIDER_CONFIG.maxZoneWidth - SLIDER_CONFIG.minZoneWidth);
-        const left = .03 + Math.random() * (.94 - width);
-        const candidate = {
-          left,
-          right: left + width,
-          width,
-          hit: false,
-          required: true,
-          critical: false
-        };
-        const separated = zones.every(z =>
-          candidate.right + .035 < z.left || candidate.left - .035 > z.right
-        );
+        const width = SLIDER_CONFIG.minZoneWidth + rng() * (SLIDER_CONFIG.maxZoneWidth - SLIDER_CONFIG.minZoneWidth);
+        const left = .03 + rng() * (.94 - width);
+        const candidate = { left, right: left + width, width, hit: false, required: true, critical: false };
+        const separated = zones.every(z => candidate.right + .035 < z.left || candidate.left - .035 > z.right);
         if (separated) zones.push(candidate);
       }
 
       let critical = null;
       for (let i = 0; i < 500 && !critical; i++) {
-        const width = SLIDER_CONFIG.criticalZoneWidthMin +
-          Math.random() * (SLIDER_CONFIG.criticalZoneWidthMax - SLIDER_CONFIG.criticalZoneWidthMin);
-        const left = .02 + Math.random() * (.96 - width);
-        const candidate = {
-          left,
-          right: left + width,
-          width,
-          hit: false,
-          required: false,
-          critical: true
-        };
-        const separated = zones.every(z =>
-          candidate.right + SLIDER_CONFIG.criticalGap < z.left ||
-          candidate.left - SLIDER_CONFIG.criticalGap > z.right
-        );
+        const width = SLIDER_CONFIG.criticalZoneWidthMin + rng() * (SLIDER_CONFIG.criticalZoneWidthMax - SLIDER_CONFIG.criticalZoneWidthMin);
+        const left = .02 + rng() * (.96 - width);
+        const candidate = { left, right: left + width, width, hit: false, required: false, critical: true };
+        const separated = zones.every(z => candidate.right + SLIDER_CONFIG.criticalGap < z.left || candidate.left - SLIDER_CONFIG.criticalGap > z.right);
         if (separated) critical = candidate;
       }
 
@@ -1004,7 +1050,9 @@
 
     function startSliderRound() {
       if (state.isGameOver || state.isVictory) return;
+      state.roundIndex++;
       state.slider.zones = makeSliderZones();
+      gameLog("round", { extra: { round: state.roundIndex, zones: state.slider.zones.map(z => ({ left: z.left, right: z.right, critical: z.critical, required: z.required })), difficulty: state.difficulty } });
       state.slider.position = 0;
       state.slider.roundStart = performance.now();
       state.slider.active = true;
@@ -1028,7 +1076,7 @@
         if (left <= 0) {
           state.slider.active = false;
           state.slider.rafId = null;
-          sliderStatus.textContent = "TIME OUT";
+          sliderStatus.textContent = "TIME OUT"; gameLog("miss", { extra: { reason: "timeout" } });
           showNotification("TIME OUT!", "#ff3344");
           damagePlayer();
           if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 180);
@@ -1040,8 +1088,9 @@
     }
 
     function setSliderPosition(pos) {
-      state.slider.position = Math.max(0, Math.min(1, pos));
-      sliderKnob.style.left = (state.slider.position * 100) + "%";
+      const nextPosition = Math.max(0, Math.min(1, pos));
+      if (state.slider.active && Math.abs(nextPosition - state.slider.position) >= 0.03) gameLog("move", { x: Number(nextPosition.toFixed(4)), extra: { round_start: state.slider.roundStart } });
+      state.slider.position = nextPosition; sliderKnob.style.left = (state.slider.position * 100) + "%";
 
       const inside = state.slider.zones.some(z =>
         !z.hit && state.slider.position >= z.left && state.slider.position <= z.right
@@ -1081,6 +1130,7 @@
         state.bestCombo = Math.max(state.bestCombo, state.combo);
         updateCombo();
 
+        gameLog("zone_hit", { zone: String(zoneIndex), x: Number(pos.toFixed(4)), combo: state.combo, extra: { critical: true, damage: SLIDER_CONFIG.damageCritical } });
         damageEnemy(SLIDER_CONFIG.damageCritical);
         showNotification(`-${SLIDER_CONFIG.damageCritical} КРИТ!`, "#ff7a00");
         flashScreen();
@@ -1129,10 +1179,8 @@
         (SLIDER_CONFIG.damageGreen - SLIDER_CONFIG.damageYellow) * accuracy
       );
 
-      state.combo++;
-      state.bestCombo = Math.max(state.bestCombo, state.combo);
-      updateCombo();
-
+      state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo); updateCombo();
+      gameLog("zone_hit", { zone: String(zoneIndex), x: Number(pos.toFixed(4)), combo: state.combo, extra: { critical: false, damage: amount, accuracy: Number(accuracy.toFixed(4)), in_green: inGreen } });
       damageEnemy(amount);
       showNotification(
         `-${amount}`,
@@ -1194,7 +1242,7 @@
           state.slider.active = false;
           state.slider.rafId = null;
           sliderTimerFill.style.width = "0%";
-          sliderStatus.textContent = "TIME OUT";
+          sliderStatus.textContent = "TIME OUT"; gameLog("miss", { extra: { reason: "timeout" } });
           state.combo = 0;
           updateCombo();
           showNotification("TIME OUT!", "#ff3344");
@@ -1302,9 +1350,9 @@
     }
     function handleMiss() { state.combo = 0; updateCombo(); showNotification("ПРОМАХ!", "#ff3344"); damagePlayer(); hitSound(false) }
     function damageEnemy(amount) { state.enemyHP = Math.max(0, state.enemyHP - amount); updateEnemyHPDisplay(); enemyOrb.parentElement.classList.remove("hit"); void enemyOrb.parentElement.offsetWidth; enemyOrb.parentElement.classList.add("hit"); if (state.enemyHP <= 0) victory() }
-    function damagePlayer() { state.playerHearts--; const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`); if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400) } updateHeartsDisplay(); shakeScreen(); if (state.playerHearts <= 0) gameOver() }
+    function damagePlayer() { state.playerHearts--; gameLog("damage", { extra: { hearts: state.playerHearts } }); const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`); if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400) } updateHeartsDisplay(); shakeScreen(); if (state.playerHearts <= 0) gameOver() }
     function victory() {
-      state.isVictory = true; state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
+      state.isVictory = true; finishBattle("victory"); state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
 
       victoryResult.innerHTML = `<h2><b>+💰${tg_data.money_drop}</b></h2> ${tg_data.items_drop.join('<br>') + '<br>'}`;
 
@@ -1312,7 +1360,7 @@
     }
 
     function gameOver() {
-      state.isGameOver = true; state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
+      state.isGameOver = true; finishBattle("death"); state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
       gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`; setTimeout(() => gameOverOverlay.classList.add("show"), 450)
     }
     function updateHeartsDisplay() { heartsSection.querySelectorAll(".heart").forEach((h, i) => h.classList.toggle("lost", i >= state.playerHearts)) }
@@ -1449,10 +1497,8 @@
       });
     }
 
-    drawStar();
-    setupEventListeners();
-
-    startGame();
+    drawStar(); setupEventListeners();
+    (async () => { const loaded = await loadBattle(); if (loaded) startGame(); })();
   </script>
 </body>
 
