@@ -429,6 +429,18 @@
       font-weight: 900
     }
 
+    .game-over-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .game-over-actions button {
+      min-width: 150px;
+    }
+
     .overlay button:active {
       background: #fff;
       color: #000;
@@ -665,11 +677,53 @@
         height: 42px;
       }
     }
+
+    #game.battle-awaiting {
+      visibility: hidden;
+    }
+
+    #game.battle-ready {
+      visibility: visible;
+    }
+
+    #battle-loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #000;
+      color: #fff;
+      text-align: center;
+    }
+
+    .battle-loading-title {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: 4px;
+    }
+
+    .battle-loading-text {
+      font-size: 13px;
+      opacity: .7;
+      letter-spacing: 2px;
+    }
+
+    #battle-loading-screen.hidden {
+      display: none;
+    }
   </style>
 </head>
 
 <body>
-  <div id="game">
+  <div id="battle-loading-screen">
+    <div class="battle-loading-title">ОХОТА</div>
+    <div class="battle-loading-text">ЗАГРУЗКА БИТВЫ...</div>
+  </div>
+  <div id="game" class="battle-awaiting">
     <div id="status">
       <div id="enemy-section">
         <div id="enemy-top">
@@ -734,7 +788,9 @@
     </div>
     <div id="game-over" class="overlay">
       <h1>ПОГИБ</h1>
-      <div class="result" id="gameover-result"></div><button id="restart-btn">Больно...</button>
+      <div class="result" id="gameover-result"></div>
+      <div class="game-over-actions"><button id="restart-btn">Больно...</button><button id="retry-btn">Заново
+          (-1⚡️)</button></div>
     </div>
     <div id="victory" class="overlay">
       <h1>ПОБЕДА!</h1>
@@ -747,7 +803,7 @@
     tg.ready();
     tg.expand();
 
-    const BATTLE_API_URL = "https://jesterapi.ddns.net";
+    const BATTLE_API_URL = (window.BATTLE_API_URL || "https://jesterapi.ddns.net").replace(/\/$/, "");
     const initData = tg.initData || "";
     let battle = null, tg_data = {}, apiReady = false, battleSeed = 0, logFlushInFlight = false;
 
@@ -763,22 +819,46 @@
       if (!response.ok) throw new Error(payload.detail || `HTTP ${response.status}`);
       return payload;
     }
+    function showLoadedBattleScreen() {
+      const game = document.getElementById("game");
+      game.classList.remove("battle-awaiting");
+      game.classList.add("battle-ready");
+      document.getElementById("battle-loading-screen").classList.add("hidden");
+    }
+
+    function showNoBattleScreen(message) {
+      const game = document.getElementById("game");
+      game.classList.remove("battle-awaiting");
+      game.classList.add("battle-ready");
+      document.getElementById("battle-start").classList.remove("show");
+      document.getElementById("no-battle").classList.add("show");
+      if (message) document.querySelector("#no-battle .result").innerHTML = message;
+      document.getElementById("battle-loading-screen").classList.add("hidden");
+    }
     async function loadBattle() {
       try {
         const payload = await apiRequest("/battle"); battle = payload.battle;
-        if (!battle) { document.getElementById("battle-start").classList.remove("show"); document.getElementById("no-battle").classList.add("show"); return false; }
+        if (!battle) {
+          showNoBattleScreen();
+          return false;
+        }
         tg_data = parseBattleData(battle.data);
         if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) throw new Error("Invalid battle data");
         tg_data.money_drop = tg_data.money_drop ?? 0;
         tg_data.items_drop = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
+        const loadedMaxHP = Number(tg_data.monster_hp);
+        state.enemyMaxHP = loadedMaxHP;
+        state.enemyHP = loadedMaxHP;
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
         if (tg_data.monster_id != null) document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
         battleSeed = Number(payload.battle.seed || 0) >>> 0;
-        apiReady = true; return true;
+        apiReady = true;
+        showLoadedBattleScreen();
+        return true;
       } catch (error) {
         console.error("[battle] load failed", error);
-        document.getElementById("battle-start").classList.remove("show"); document.getElementById("no-battle").classList.add("show");
-        document.querySelector("#no-battle .result").innerHTML = "НЕ УДАЛОСЬ ЗАГРУЗИТЬ БИТВУ<br>ПОПРОБУЙТЕ ОТКРЫТЬ ИГРУ ЕЩЁ РАЗ"; return false;
+        showNoBattleScreen("НЕ УДАЛОСЬ ЗАГРУЗИТЬ БИТВУ<br>ПОПРОБУЙТЕ ОТКРЫТЬ ИГРУ ЕЩЁ РАЗ");
+        return false;
       }
     }
   </script>
@@ -790,7 +870,7 @@
       difficulty: 1, combo: 0, bestCombo: 0, swipeStart: null, swipeRay: -1, startTimer: null,
       audio: null, lastCueTarget: -1,
       slider: { zones: [], position: .5, active: false, roundStart: 0, rafId: null, drag: false },
-      log: [], logSent: 0, sessionStartedAt: 0, finished: false, nextSeq: 1, roundIndex: 0
+      log: [], logSent: 0, sessionStartedAt: 0, finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0
     };
     const STAR_ANGLES = [-90, -18, 54, 126, 198];
     const CX = 100, CY = 100, R_TIP = 97, R_MID = 40, RAY_W = 6.5;
@@ -894,28 +974,35 @@
       }
     }
     async function finishBattle(result) {
-      if (state.finished || !apiReady || !battle) return;
+      if (state.finishingPromise) return state.finishingPromise;
+      if (state.finished || !apiReady || !battle) return false;
       state.finished = true;
       gameLog(result === "victory" ? "victory" : "death", {
         combo: state.bestCombo,
         extra: { enemy_hp: state.enemyHP, max_hp: state.enemyMaxHP }
       });
-      // Отправляем только ещё не подтверждённые сервером события.
-      try {
-        const payload = await apiRequest("/battle/finish", {
-          method: "POST",
-          body: JSON.stringify({ result, logs: state.log })
-        });
-        state.logSent = state.log.length;
-        console.info("[battle] finish validation", payload.validation);
-      } catch (error) {
-        console.error("[battle] finish failed", error);
-      }
+      state.finishingPromise = (async () => {
+        try {
+          const payload = await apiRequest("/battle/finish", {
+            method: "POST",
+            body: JSON.stringify({ result, logs: state.log })
+          });
+          state.logSent = state.log.length;
+          console.info("[battle] finish validation", payload.validation);
+          return Boolean(payload.reward_allowed || payload.validation?.valid);
+        } catch (error) {
+          console.error("[battle] finish failed", error);
+          return false;
+        } finally {
+          state.finishingPromise = null;
+        }
+      })();
+      return state.finishingPromise;
     }
     window.addEventListener("pagehide", () => { flushLogs(true); });
 
     function startGame() {
-      state.finished = false; state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0; logFlushInFlight = false;
+      state.finished = false; state.finishingPromise = null; state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0; logFlushInFlight = false;
       clearTimeout(state.startTimer);
       if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
       if (state.slider?.rafId) cancelAnimationFrame(state.slider.rafId);
@@ -1351,17 +1438,24 @@
     function handleMiss() { state.combo = 0; updateCombo(); showNotification("ПРОМАХ!", "#ff3344"); damagePlayer(); hitSound(false) }
     function damageEnemy(amount) { state.enemyHP = Math.max(0, state.enemyHP - amount); updateEnemyHPDisplay(); enemyOrb.parentElement.classList.remove("hit"); void enemyOrb.parentElement.offsetWidth; enemyOrb.parentElement.classList.add("hit"); if (state.enemyHP <= 0) victory() }
     function damagePlayer() { state.playerHearts--; gameLog("damage", { extra: { hearts: state.playerHearts } }); const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`); if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400) } updateHeartsDisplay(); shakeScreen(); if (state.playerHearts <= 0) gameOver() }
-    function victory() {
-      state.isVictory = true; finishBattle("victory"); state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
-
+    async function victory() {
+      state.isVictory = true; state.slider.active = false;
+      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
+      if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
+      clearCueVisuals();
+      await finishBattle("victory");
       victoryResult.innerHTML = `<h2><b>+💰${tg_data.money_drop}</b></h2> ${tg_data.items_drop.join('<br>') + '<br>'}`;
-
-      setTimeout(() => victoryOverlay.classList.add("show"), 450)
+      setTimeout(() => victoryOverlay.classList.add("show"), 450);
     }
 
-    function gameOver() {
-      state.isGameOver = true; finishBattle("death"); state.slider.active = false; if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId); if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId); clearCueVisuals();
-      gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`; setTimeout(() => gameOverOverlay.classList.add("show"), 450)
+    async function gameOver() {
+      state.isGameOver = true; state.slider.active = false;
+      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
+      if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
+      clearCueVisuals();
+      await finishBattle("death");
+      gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`;
+      setTimeout(() => gameOverOverlay.classList.add("show"), 450);
     }
     function updateHeartsDisplay() { heartsSection.querySelectorAll(".heart").forEach((h, i) => h.classList.toggle("lost", i >= state.playerHearts)) }
     function updateEnemyHPDisplay() { enemyHPFill.style.width = (state.enemyHP / state.enemyMaxHP * 100) + "%" }
@@ -1403,6 +1497,35 @@
       const rayIdx = dist >= 30 ? matchRay(dx, dy) : -1;
       if (rayIdx >= 0) { slashFlash(rayIdx); handleInput(rayIdx) } else hideSwipeHighlight()
     }
+    async function restartBattle() {
+      const retryBtn = document.getElementById("retry-btn");
+      if (retryBtn.disabled || !battle) return;
+      retryBtn.disabled = true;
+      try {
+        const payload = await apiRequest("/battle/restart", {
+          method: "POST",
+          body: JSON.stringify({ battle_id: battle.id })
+        });
+        if (!payload.battle) throw new Error("Battle restart returned no battle");
+        battle = payload.battle;
+        tg_data = parseBattleData(battle.data);
+        state.enemyMaxHP = Number(tg_data.monster_hp);
+        state.enemyHP = state.enemyMaxHP;
+        battleSeed = Number(battle.seed || 0) >>> 0;
+        apiReady = true;
+        document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
+        if (tg_data.monster_id != null) sliderMonster.src = `assets/${tg_data.monster_id}.png`;
+        gameOverOverlay.classList.remove("show");
+        startGame();
+        beginBattle();
+      } catch (error) {
+        console.error("[battle] restart failed", error);
+        showNotification(error.message === "Not enough energy" ? "НЕТ ЭНЕРГИИ" : "НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
+      } finally {
+        retryBtn.disabled = false;
+      }
+    }
+
     function setupEventListeners() {
       const zone = document.getElementById("input-zone");
       zone.addEventListener("touchstart", e => {
@@ -1479,21 +1602,15 @@
       startBattleBtn.addEventListener("click", beginBattle);
 
       document.getElementById("restart-btn").addEventListener("click", () => {
-        const dataToSend = JSON.stringify({
-          action: "hunt",
-          message: "victory"
-        });
+        tg.close();
+      });
 
-        tg.sendData(dataToSend);
+      document.getElementById("retry-btn").addEventListener("click", () => {
+        void restartBattle();
       });
 
       document.getElementById("next-btn").addEventListener("click", () => {
-        const dataToSend = JSON.stringify({
-          action: "hunt",
-          message: "victory"
-        });
-
-        tg.sendData(dataToSend);
+        tg.close();
       });
     }
 
