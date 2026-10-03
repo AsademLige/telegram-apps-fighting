@@ -741,6 +741,11 @@
         const payload = await apiRequest("/battle");
         battle = payload.battle;
         if (!battle) { showNoBattleScreen(); return false; }
+
+        if (battle.slider_config) {
+          sliderConfig = { ...sliderConfig, ...battle.slider_config };
+        }
+
         showLoadedBattleScreen();
         tg_data = parseBattleData(battle.data);
         if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) throw new Error("Invalid battle data");
@@ -776,12 +781,31 @@
       finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0,
     };
 
-    const SLIDER_CONFIG = {
-      roundTime: 2600, minZones: 2, maxZones: 4,
-      minZoneWidth: .13, maxZoneWidth: .19,
-      greenRatio: .20,
-      damageYellow: 7, damageGreen: 24, damageCritical: 45,
-      criticalZoneWidthMin: .035, criticalZoneWidthMax: .035, criticalGap: .025
+    // ЕДИНЫЙ ИСТОЧНИК КОНФИГУРАЦИИ (перезаписывается данными с бэкенда)
+    let sliderConfig = {
+      round_time_base_ms: 2600,
+      round_time_decay_per_diff: 550,
+      round_time_min_ms: 1350,
+      travel_time_base: 1450,
+      travel_time_min: 700,
+      min_zone_width: 0.13,
+      max_zone_width: 0.19,
+      min_zone_left: 0.03,
+      max_zone_left_bound: 0.94,
+      zone_gap: 0.035,
+      critical_zone_width: 0.035,
+      critical_min_left: 0.02,
+      critical_max_left_bound: 0.96,
+      critical_gap: 0.025,
+      max_zones: 4,
+      base_zones: 2,
+      difficulty_zone_multiplier: 8,
+      difficulty_zone_divisor: 3,
+      // Параметры урона и зон, добавленные для полной централизации
+      damageYellow: 7,
+      damageGreen: 24,
+      damageCritical: 45,
+      greenRatio: 0.20
     };
 
     const sliderGame = document.getElementById("slider-game");
@@ -981,6 +1005,7 @@
         if (force && state.logSent < state.log.length) void flushLogs(true);
       }
     }
+
     async function finishBattle(result) {
       if (state.finishingPromise) return state.finishingPromise;
       if (state.finished || !apiReady || !battle) return false;
@@ -1079,8 +1104,8 @@
     function sliderDifficulty() {
       const d = Math.max(0, state.difficulty - 1);
       return {
-        time: Math.max(1350, SLIDER_CONFIG.roundTime - d * 550),
-        zones: Math.min(SLIDER_CONFIG.maxZones, SLIDER_CONFIG.minZones + Math.floor(d * 8 / 3))
+        time: Math.max(sliderConfig.round_time_min_ms, sliderConfig.round_time_base_ms - d * sliderConfig.round_time_decay_per_diff),
+        zones: Math.min(sliderConfig.max_zones, sliderConfig.base_zones + Math.floor(d * sliderConfig.difficulty_zone_multiplier / sliderConfig.difficulty_zone_divisor))
       };
     }
 
@@ -1100,41 +1125,28 @@
       const rng = seededRandom((battleSeed ^ Math.imul(state.roundIndex + 1, 0x9E3779B9)) >>> 0);
       const zones = [];
       let attempts = 0;
+
       while (zones.length < count && attempts++ < 500) {
-        const width = SLIDER_CONFIG.minZoneWidth + rng() * (SLIDER_CONFIG.maxZoneWidth - SLIDER_CONFIG.minZoneWidth);
-        const left = .03 + rng() * (.94 - width);
+        const width = sliderConfig.min_zone_width + rng() * (sliderConfig.max_zone_width - sliderConfig.min_zone_width);
+        const left = sliderConfig.min_zone_left + rng() * (sliderConfig.max_zone_left_bound - width);
         const candidate = { left, right: left + width, width, hit: false, required: true, critical: false };
-        if (zones.every(z => candidate.right + .035 < z.left || candidate.left - .035 > z.right)) zones.push(candidate);
+        if (zones.every(z => candidate.right + sliderConfig.zone_gap < z.left || candidate.left - sliderConfig.zone_gap > z.right)) {
+          zones.push(candidate);
+        }
       }
+
       let critical = null;
       for (let i = 0; i < 500 && !critical; i++) {
-        const width = SLIDER_CONFIG.criticalZoneWidthMin;
-        const left = .02 + rng() * (.96 - width);
+        const width = sliderConfig.critical_zone_width;
+        const left = sliderConfig.critical_min_left + rng() * (sliderConfig.critical_max_left_bound - width);
         const candidate = { left, right: left + width, width, hit: false, required: false, critical: true };
-        if (zones.every(z => candidate.right + SLIDER_CONFIG.criticalGap < z.left || candidate.left - SLIDER_CONFIG.criticalGap > z.right)) {
+        if (zones.every(z => candidate.right + sliderConfig.critical_gap < z.left || candidate.left - sliderConfig.critical_gap > z.right)) {
           critical = candidate;
         }
       }
       if (critical) zones.push(critical);
       zones.sort((a, b) => a.left - b.left);
       return zones;
-    }
-
-    function calculateRunnerPosition(elapsed, params) {
-      const travelTime = params.travel_time;
-      const basePos = (elapsed % travelTime) / travelTime;
-
-      const noise1 = params.noise_amplitude * Math.sin(
-        2 * Math.PI * params.noise_frequency * elapsed / 1000 +
-        params.noise_phase
-      );
-
-      const noise2 = params.noise2_amplitude * Math.sin(
-        2 * Math.PI * params.noise2_frequency * elapsed / 1000 +
-        params.noise2_phase
-      );
-
-      return Math.max(0, Math.min(1, basePos + noise1 + noise2));
     }
 
     function renderSliderZones() {
@@ -1188,7 +1200,7 @@
       const roundStartPerf = state.slider.roundStartPerf;
       const roundStartUnix = state.slider.roundStartUnix;
       const total = sliderDifficulty().time;
-      const travelTime = Math.max(700, 1450 / state.difficulty);
+      const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
 
       function frame(now) {
         if (!state.slider.active || state.isGameOver || state.isVictory ||
@@ -1242,7 +1254,7 @@
 
       const nowUnix = Date.now();
       const elapsedUnix = nowUnix - state.slider.roundStartUnix;
-      const travelTime = Math.max(700, 1450 / state.difficulty);
+      const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
       const pos = (elapsedUnix % travelTime) / travelTime;
 
       const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
@@ -1275,8 +1287,8 @@
       if (z.critical) {
         state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
         updateCombo();
-        damageEnemy(SLIDER_CONFIG.damageCritical);
-        showNotification(`-${SLIDER_CONFIG.damageCritical} КРИТ!`, "#ff7a00");
+        damageEnemy(sliderConfig.damageCritical);
+        showNotification(`-${sliderConfig.damageCritical} КРИТ!`, "#ff7a00");
         flashScreen();
         sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
         tone(980, .11, "sawtooth", .05);
@@ -1319,8 +1331,9 @@
       const center = (z.left + z.right) / 2;
       const half = z.width / 2;
       const accuracy = Math.max(0, 1 - Math.abs(pos - center) / half);
-      const amount = Math.round(SLIDER_CONFIG.damageYellow + (SLIDER_CONFIG.damageGreen - SLIDER_CONFIG.damageYellow) * accuracy);
-      const inGreen = Math.abs(pos - center) <= (z.width * SLIDER_CONFIG.greenRatio) / 2;
+
+      const amount = Math.round(sliderConfig.damageYellow + (sliderConfig.damageGreen - sliderConfig.damageYellow) * accuracy);
+      const inGreen = Math.abs(pos - center) <= (z.width * sliderConfig.greenRatio) / 2;
 
       state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
       updateCombo();
