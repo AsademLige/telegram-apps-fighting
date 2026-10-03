@@ -11,7 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent
+      -webkit-tap-highlight-color: transparent;
     }
 
     html,
@@ -19,7 +19,6 @@
       width: 100%;
       height: 100%;
       height: 100dvh;
-      height: 100svh;
       margin: 0;
       padding: 0;
       overflow: hidden;
@@ -29,7 +28,6 @@
       font-family: Arial, Helvetica, sans-serif;
       touch-action: none;
       user-select: none;
-      -webkit-user-select: none;
       position: fixed;
       inset: 0;
     }
@@ -64,24 +62,16 @@
       touch-action: none;
     }
 
-    #star-container {
-      width: min(84vw, 67dvh);
-      height: min(84vw, 67dvh);
-      position: relative;
-      filter: none;
-      touch-action: none;
-    }
-
     #enemy-section {
       display: flex;
       flex-direction: column;
-      gap: 7px
+      gap: 7px;
     }
 
     #enemy-top {
       display: flex;
       align-items: center;
-      justify-content: space-between
+      justify-content: space-between;
     }
 
     #enemy-label {
@@ -89,14 +79,14 @@
       font-weight: 800;
       letter-spacing: 3px;
       color: #f3e7bd;
-      text-transform: uppercase
+      text-transform: uppercase;
     }
 
     #enemy-core {
       font-size: 10px;
       color: #e95732;
       letter-spacing: 2px;
-      font-weight: 700
+      font-weight: 700;
     }
 
     #enemy-hp-bar {
@@ -105,7 +95,7 @@
       border-radius: 0;
       overflow: hidden;
       border: 2px solid #f3e7bd;
-      box-shadow: 3px 3px 0 #07120d
+      box-shadow: 3px 3px 0 #07120d;
     }
 
     #enemy-hp-fill {
@@ -113,11 +103,6 @@
       width: 100%;
       background: #e95732;
       transition: width .22s steps(8, end);
-      box-shadow: none
-    }
-
-    #enemy-visual {
-      display: none
     }
 
     #combo {
@@ -126,11 +111,11 @@
       color: #d6c997;
       min-height: 18px;
       text-align: center;
-      font-weight: 800
+      font-weight: 800;
     }
 
     #combo b {
-      color: #63b85b
+      color: #63b85b;
     }
 
     #hearts-section {
@@ -146,308 +131,31 @@
       width: 50px;
       height: 50px;
       transition: transform .2s, opacity .2s;
-      filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.4));
+      filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, .4));
     }
 
     .heart.lost {
-      opacity: .15
+      opacity: .15;
     }
 
     .heart.breaking {
-      animation: heartBreak .35s ease-out
+      animation: heartBreak .35s ease-out;
     }
 
     @keyframes heartBreak {
       0% {
-        transform: scale(1)
+        transform: scale(1);
       }
 
       40% {
-        transform: scale(1.5) rotate(-8deg)
+        transform: scale(1.5) rotate(-8deg);
       }
 
       100% {
-        transform: scale(1)
+        transform: scale(1);
       }
     }
 
-    #star-svg {
-      width: 100%;
-      height: 100%;
-      overflow: visible
-    }
-
-    .ray-base {
-      fill: #173b2b;
-      stroke: #f3e7bd;
-      stroke-width: 1.5;
-      transition: fill .10s, opacity .10s
-    }
-
-    .ray-base.cue-active {
-      fill: var(--c-fill);
-      opacity: var(--c-opacity);
-      filter: none;
-      transition: none
-    }
-
-    .ray-hl {
-      opacity: 0;
-      pointer-events: none
-    }
-
-    .ray-hl.hl-on {
-      opacity: 1
-    }
-
-    .ray-tip {
-      fill: #30384b;
-      transition: fill .12s, filter .12s
-    }
-
-    .ray-base.cue-active+.ray-hl+.ray-tip {
-      fill: var(--c-fill);
-      filter: drop-shadow(0 0 7px var(--c-glow))
-    }
-
-    #center-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      background: #e7d79e;
-      border: 4px solid #10251d;
-      outline: 3px solid #f3e7bd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 5;
-      transition: .10s;
-      box-shadow: 5px 5px 0 #07120d
-    }
-
-    #center-btn::before {
-      content: "";
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #e95732;
-      box-shadow: none;
-      transition: .10s
-    }
-
-    #center-btn.cue-active {
-      border-color: #10251d;
-      outline-color: var(--c-fill);
-      box-shadow: 5px 5px 0 #07120d
-    }
-
-    #center-btn.cue-active::before {
-      background: var(--c-fill);
-      box-shadow: none
-    }
-
-    #center-btn.tap-ping {
-      animation: tapPing .25s ease-out
-    }
-
-    @keyframes tapPing {
-      0% {
-        transform: translate(-50%, -50%) scale(1)
-      }
-
-      50% {
-        transform: translate(-50%, -50%) scale(.8)
-      }
-
-      100% {
-        transform: translate(-50%, -50%) scale(1)
-      }
-    }
-
-    #timing-hint {
-      position: absolute;
-      bottom: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: #9eaf86;
-      text-transform: uppercase;
-      pointer-events: none;
-      transition: opacity .2s;
-      font-weight: 800
-    }
-
-    #notification {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 29px;
-      font-weight: 900;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      opacity: 0;
-      pointer-events: none;
-      text-shadow: 3px 3px 0 #07120d;
-      white-space: nowrap;
-      z-index: 30
-    }
-
-    #notification.show {
-      animation: notifyPulse .72s ease-out
-    }
-
-    @keyframes notifyPulse {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(.55)
-      }
-
-      18% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.12)
-      }
-
-      75% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1)
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(.92)
-      }
-    }
-
-    #flash-overlay {
-      position: fixed;
-      inset: 0;
-      background: #63b85b;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 100
-    }
-
-    #flash-overlay.flash {
-      animation: flashEffect .25s ease-out
-    }
-
-    @keyframes flashEffect {
-      0% {
-        opacity: .42
-      }
-
-      100% {
-        opacity: 0
-      }
-    }
-
-    #game.shake {
-      animation: shakeEffect .24s ease-out
-    }
-
-    @keyframes shakeEffect {
-
-      0%,
-      100% {
-        transform: translateX(0)
-      }
-
-      25% {
-        transform: translateX(-7px)
-      }
-
-      50% {
-        transform: translateX(7px)
-      }
-
-      75% {
-        transform: translateX(-4px)
-      }
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: #10251d;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s
-    }
-
-    .overlay.show {
-      opacity: 1;
-      pointer-events: all
-    }
-
-    .overlay h1 {
-      font-size: 42px;
-      letter-spacing: 7px;
-      margin-bottom: 20px;
-      text-transform: uppercase
-    }
-
-    #game-over h1 {
-      color: #e95732;
-      text-shadow: 4px 4px 0 #07120d
-    }
-
-    #victory h1 {
-      color: #63b85b;
-      text-shadow: 4px 4px 0 #07120d
-    }
-
-    .result {
-      color: #7e879f;
-      font-size: 12px;
-      letter-spacing: 2px;
-      line-height: 2;
-      text-align: center;
-      margin-bottom: 28px
-    }
-
-    .overlay button {
-      padding: 15px 34px;
-      font-size: 13px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      background: #e7d79e;
-      border: 3px solid #f3e7bd;
-      color: #10251d;
-      border-radius: 0;
-      box-shadow: 5px 5px 0 #07120d;
-      font-weight: 900
-    }
-
-    .game-over-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .game-over-actions button {
-      min-width: 150px;
-    }
-
-    .overlay button:active {
-      background: #fff;
-      color: #000;
-      border-color: #fff
-    }
-
-    /* ===== SLIDER GAME MODE ===== */
     #slider-monster {
       position: absolute;
       left: 50%;
@@ -468,21 +176,17 @@
     @keyframes monsterHit {
       0% {
         transform: translate(-50%, -50%) scale(1);
-        filter: brightness(1) drop-shadow(31px 10px 0px rgba(255, 255, 255, 0.25));
+        filter: brightness(1);
       }
 
       25% {
         transform: translate(-50%, -50%) scale(.96) translateX(-5px);
-        filter: brightness(1.7) drop-shadow(12px 0px 0px rgba(255, 255, 255, 0.25));
+        filter: brightness(1.7);
       }
 
       50% {
         transform: translate(-50%, -50%) scale(1.03) translateX(5px);
-        filter: brightness(1.25) drop-shadow(12px 0px 0px rgba(255, 255, 255, 0.25));
-      }
-
-      75% {
-        transform: translate(-50%, -50%) scale(.99) translateX(-2px);
+        filter: brightness(1.25);
       }
 
       100% {
@@ -524,64 +228,23 @@
       overflow: hidden;
     }
 
-    #slider-track::before {
-      content: "";
-      position: absolute;
-      inset: 9px 0;
-      background: linear-gradient(90deg, #d4a72c 0%, #e5c84c 14%, #73b957 50%, #e5c84c 86%, #d4a72c 100%);
-      opacity: .13;
-    }
-
     .slider-zone {
       position: absolute;
       top: 8px;
       height: 32px;
       border: 2px solid rgba(243, 231, 189, .9);
-      background: linear-gradient(90deg,
-          #d7a52d 0%,
-          #e6c448 28%,
-          #98c94e 43%,
-          #54b957 50%,
-          #98c94e 57%,
-          #e6c448 72%,
-          #d7a52d 100%);
-      box-shadow: inset 0 0 0 1px rgba(7, 18, 13, .35);
-      transition: opacity .12s, filter .12s, transform .12s;
+      background: linear-gradient(90deg, #d7a52d 0%, #e6c448 28%, #98c94e 43%, #54b957 50%, #98c94e 57%, #e6c448 72%, #d7a52d 100%);
+      transition: opacity .12s, filter .12s;
       pointer-events: none;
     }
 
     .slider-zone.hit {
-      opacity: .0;
+      opacity: 0;
       filter: grayscale(1);
     }
 
     .slider-zone.critical {
       background: #ffb000;
-      /* border-color: #ffd166; */
-    }
-
-    .slider-zone.critical::after {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff7df;
-      pointer-events: none;
-    }
-
-    .slider-zone.critical.hit {
-      opacity: 0;
-      animation: none;
-      transform: scaleY(.75);
-      filter: brightness(1.8);
-    }
-
-    @keyframes criticalZonePulse {
-      50% {
-        filter: brightness(1.18);
-        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .3), 0 0 22px rgba(255, 122, 0, 1);
-      }
     }
 
     .slider-zone .zone-green {
@@ -596,17 +259,15 @@
 
     #slider-knob {
       position: absolute;
-      top: 3px;
+      top: 50%;
       width: 15px;
-      height: 48px;
-      transform: translateX(-50%);
+      height: 38px;
+      transform: translate(-50%, -50%);
       background: #f3e7bd;
       border: 3px solid #10251d;
       box-shadow: 3px 3px 0 #07120d;
       z-index: 10;
       pointer-events: none;
-      transition: none;
-      /* transition: left .035s linear; */
     }
 
     #slider-knob::after {
@@ -649,33 +310,163 @@
       font-weight: 800;
     }
 
-    #slider-game.flash-hit #slider-track {
-      animation: sliderHit .16s ease-out;
+    #notification {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0;
+      pointer-events: none;
+      text-shadow: 3px 3px 0 #07120d;
+      white-space: nowrap;
+      z-index: 30;
     }
 
-    @keyframes sliderHit {
+    #notification.show {
+      animation: notifyPulse .72s ease-out;
+    }
+
+    @keyframes notifyPulse {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.55);
+      }
+
+      18% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.12);
+      }
+
+      75% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.92);
+      }
+    }
+
+    #flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: #63b85b;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    #flash-overlay.flash {
+      animation: flashEffect .25s ease-out;
+    }
+
+    @keyframes flashEffect {
+      0% {
+        opacity: .42;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
+    #game.shake {
+      animation: shakeEffect .24s ease-out;
+    }
+
+    @keyframes shakeEffect {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-7px);
+      }
+
       50% {
-        transform: scaleY(.92);
+        transform: translateX(7px);
+      }
+
+      75% {
+        transform: translateX(-4px);
       }
     }
 
-    @media (max-width: 520px) {
-      #slider-game {
-        width: 94vw;
-      }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: #10251d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
 
-      #slider-track {
-        height: 48px;
-      }
+    .overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
 
-      .slider-zone {
-        top: 7px;
-        height: 28px;
-      }
+    .overlay h1 {
+      font-size: 42px;
+      letter-spacing: 7px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
 
-      #slider-knob {
-        height: 42px;
-      }
+    #game-over h1 {
+      color: #e95732;
+      text-shadow: 4px 4px 0 #07120d;
+    }
+
+    #victory h1 {
+      color: #63b85b;
+      text-shadow: 4px 4px 0 #07120d;
+    }
+
+    .result {
+      color: #7e879f;
+      font-size: 12px;
+      letter-spacing: 2px;
+      line-height: 2;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .overlay button {
+      padding: 15px 34px;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: #e7d79e;
+      border: 3px solid #f3e7bd;
+      color: #10251d;
+      border-radius: 0;
+      box-shadow: 5px 5px 0 #07120d;
+      font-weight: 900;
+    }
+
+    .game-over-actions {
+      display: grid;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .game-over-actions button {
+      min-width: 150px;
     }
 
     #game.battle-awaiting {
@@ -695,7 +486,7 @@
       align-items: center;
       justify-content: center;
       gap: 12px;
-      background: #000;
+      background: #10251d;
       color: #fff;
       text-align: center;
     }
@@ -715,23 +506,139 @@
     #battle-loading-screen.hidden {
       display: none;
     }
+
+    #retry-btn {
+      background: #10251d;
+      color: #e7d79e;
+      border: 0;
+      box-shadow: none;
+      padding: 8px 34px;
+    }
+
+    /* =========================
+   BUTTON INTERACTIONS
+   ========================= */
+
+    .overlay button,
+    #retry-btn {
+      position: relative;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+
+      transition:
+        background-color .12s steps(2, end),
+        color .12s steps(2, end),
+        border-color .12s steps(2, end),
+        transform .08s steps(2, end),
+        box-shadow .08s steps(2, end),
+        filter .12s steps(2, end);
+    }
+
+    /* Hover — desktop */
+    @media (hover: hover) and (pointer: fine) {
+      .overlay button:not(:disabled):hover {
+        background: #f3e7bd;
+        color: #10251d;
+        border-color: #fff5cf;
+
+        transform: translate(-2px, -2px);
+
+        box-shadow:
+          7px 7px 0 #07120d,
+          0 0 0 2px rgba(99, 184, 91, .15);
+
+        filter: brightness(1.04);
+      }
+
+      #retry-btn:not(:disabled):hover {
+        color: #fff5cf;
+        background: #173429;
+
+        transform: translate(-1px, -1px);
+
+        box-shadow:
+          4px 4px 0 #07120d;
+      }
+    }
+
+    /* Tap / press */
+    .overlay button:not(:disabled):active {
+      transform: translate(3px, 3px);
+
+      box-shadow:
+        1px 1px 0 #07120d;
+
+      background: #d6c997;
+      border-color: #e7d79e;
+
+      filter: brightness(.94);
+    }
+
+    /* Retry button — pressed */
+    #retry-btn:not(:disabled):active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+      background: #0b1b14;
+      color: #f3e7bd;
+    }
+
+    /* Keyboard focus */
+    .overlay button:focus-visible {
+      outline: 2px solid #63b85b;
+      outline-offset: 4px;
+    }
+
+    /* Disabled state */
+    .overlay button:disabled {
+      opacity: .45;
+      cursor: default;
+      filter: grayscale(.5);
+      transform: none;
+      box-shadow: 3px 3px 0 #07120d;
+    }
+
+    @media (hover: none) and (pointer: coarse) {
+      .overlay button:not(:disabled) {
+        transition:
+          background-color .08s steps(2, end),
+          transform .08s steps(2, end),
+          box-shadow .08s steps(2, end),
+          filter .08s steps(2, end);
+      }
+
+      .overlay button:not(:disabled):active {
+        transform: translate(3px, 3px) scale(.98);
+        box-shadow: 1px 1px 0 #07120d;
+        background: #d6c997;
+        filter: brightness(.92);
+      }
+
+      #retry-btn:not(:disabled):active {
+        transform: translate(2px, 2px) scale(.98);
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div id="battle-loading-screen">
+  <div id="battle-loading-screen" class="overlay show">
     <div class="battle-loading-title">ОХОТА</div>
     <div class="battle-loading-text">ЗАГРУЗКА БИТВЫ...</div>
   </div>
+
+  <div id="no-battle" class="overlay">
+    <h1>НЕТ БИТВЫ</h1>
+    <div class="result">СЕЙЧАС НЕТ АКТИВНОЙ БИТВЫ<br>ЗАКРОЙТЕ ИГРУ И ПОПРОБУЙТЕ ПОЗЖЕ</div>
+  </div>
+
   <div id="game" class="battle-awaiting">
     <div id="status">
       <div id="enemy-section">
         <div id="enemy-top">
           <div id="enemy-label"></div>
           <div id="enemy-core">Жив</div>
-        </div>
-        <div id="enemy-visual">
-          <div id="enemy-orb"></div>
         </div>
         <div id="enemy-hp-bar">
           <div id="enemy-hp-fill"></div>
@@ -741,10 +648,6 @@
     </div>
 
     <div id="input-zone">
-      <div id="star-container">
-        <svg id="star-svg" viewBox="0 0 200 200"></svg>
-        <div id="center-btn"></div>
-      </div>
       <img id="slider-monster" alt="" />
       <div id="slider-game">
         <div id="slider-title">MOVE THE RUNNER • HIT EVERY ZONE</div>
@@ -754,7 +657,7 @@
         <div id="slider-timer">
           <div id="slider-timer-fill"></div>
         </div>
-        <div id="slider-status" style="display: none;"></div>
+        <div id="slider-status">НАЖМИТЕ ЧТОБЫ АТАКОВАТЬ</div>
         <div id="hearts-section">
           <div class="heart" data-heart="0"><svg viewBox="0 0 24 24" fill="#ff4466">
               <path
@@ -770,16 +673,10 @@
             </svg></div>
         </div>
       </div>
-      <div id="timing-hint">SWIPE OUT • TAP CORE</div>
     </div>
 
     <div id="notification"></div>
     <div id="flash-overlay"></div>
-
-    <div id="no-battle" class="overlay">
-      <h1>НЕТ БИТВЫ</h1>
-      <div class="result">СЕЙЧАС НЕТ АКТИВНОЙ БИТВЫ<br>ЗАКРОЙТЕ ИГРУ И ПОПРОБУЙТЕ ПОЗЖЕ</div>
-    </div>
 
     <div id="battle-start" class="overlay show">
       <h1>ОХОТА</h1>
@@ -789,19 +686,21 @@
     <div id="game-over" class="overlay">
       <h1>ПОГИБ</h1>
       <div class="result" id="gameover-result"></div>
-      <div class="game-over-actions"><button id="restart-btn">Больно...</button><button id="retry-btn">Заново
-          (-1⚡️)</button></div>
+      <div class="game-over-actions">
+        <button id="end-btn">Выйти</button>
+        <button id="retry-btn">Заново (-1⚡️)</button>
+      </div>
     </div>
     <div id="victory" class="overlay">
       <h1>ПОБЕДА!</h1>
-      <div class="result" id="victory-result"></div><button id="next-btn">Забрать добычу</button>
+      <div class="result" id="victory-result"></div>
+      <button id="next-btn">Забрать добычу</button>
     </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    tg.ready(); tg.expand();
 
     const BATTLE_API_URL = (window.BATTLE_API_URL || "https://jesterapi.ddns.net").replace(/\/$/, "");
     const initData = tg.initData || "";
@@ -812,48 +711,48 @@
       if (typeof data === "object") return data;
       try { return JSON.parse(data); } catch (_) { return {}; }
     }
+
     async function apiRequest(path, options = {}) {
       if (!initData) throw new Error("Telegram initData is unavailable");
-      const response = await fetch(`${BATTLE_API_URL}${path}`, { ...options, headers: { "Content-Type": "application/json", "X-Init-Data": initData, ...(options.headers || {}) } });
+      const response = await fetch(`${BATTLE_API_URL}${path}`, {
+        ...options,
+        headers: { "Content-Type": "application/json", "X-Init-Data": initData, ...(options.headers || {}) }
+      });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.detail || `HTTP ${response.status}`);
       return payload;
     }
+
     function showLoadedBattleScreen() {
-      const game = document.getElementById("game");
-      game.classList.remove("battle-awaiting");
-      game.classList.add("battle-ready");
+      document.getElementById("game").classList.remove("battle-awaiting");
+      document.getElementById("game").classList.add("battle-ready");
       document.getElementById("battle-loading-screen").classList.add("hidden");
     }
-
     function showNoBattleScreen(message) {
-      const game = document.getElementById("game");
-      game.classList.remove("battle-awaiting");
-      game.classList.add("battle-ready");
+      document.getElementById("game").classList.add("hidden");
       document.getElementById("battle-start").classList.remove("show");
       document.getElementById("no-battle").classList.add("show");
       if (message) document.querySelector("#no-battle .result").innerHTML = message;
       document.getElementById("battle-loading-screen").classList.add("hidden");
     }
+
     async function loadBattle() {
       try {
-        const payload = await apiRequest("/battle"); battle = payload.battle;
-        if (!battle) {
-          showNoBattleScreen();
-          return false;
-        }
+        const payload = await apiRequest("/battle");
+        battle = payload.battle;
+        if (!battle) { showNoBattleScreen(); return false; }
+        showLoadedBattleScreen();
         tg_data = parseBattleData(battle.data);
         if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) throw new Error("Invalid battle data");
         tg_data.money_drop = tg_data.money_drop ?? 0;
         tg_data.items_drop = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
-        const loadedMaxHP = Number(tg_data.monster_hp);
-        state.enemyMaxHP = loadedMaxHP;
-        state.enemyHP = loadedMaxHP;
+        state.enemyMaxHP = Number(tg_data.monster_hp);
+        state.enemyHP = state.enemyMaxHP;
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
+        document.getElementById("slider-monster").onerror = function () { this.style.display = 'none'; };
         if (tg_data.monster_id != null) document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
         battleSeed = Number(payload.battle.seed || 0) >>> 0;
         apiReady = true;
-        showLoadedBattleScreen();
         return true;
       } catch (error) {
         console.error("[battle] load failed", error);
@@ -865,101 +764,210 @@
 
   <script>
     const state = {
-      playerHearts: 3, enemyHP: tg_data.monster_hp, enemyMaxHP: tg_data.monster_hp,
-      currentCue: null, isGameOver: false, isVictory: false,
-      difficulty: 1, combo: 0, bestCombo: 0, swipeStart: null, swipeRay: -1, startTimer: null,
-      audio: null, lastCueTarget: -1,
-      slider: { zones: [], position: .5, active: false, roundStart: 0, rafId: null, drag: false },
-      log: [], logSent: 0, sessionStartedAt: 0, finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0
+      playerHearts: 3, enemyHP: 0, enemyMaxHP: 0,
+      isGameOver: false, isVictory: false,
+      difficulty: 1, combo: 0, bestCombo: 0, crit_damage: 0,
+      audio: null,
+      slider: {
+        zones: [], position: 0, active: false,
+        roundStart: 0, roundStartUnix: 0, rafId: null
+      },
+      log: [], logSent: 0, sessionStartedAt: 0,
+      finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0,
     };
-    const STAR_ANGLES = [-90, -18, 54, 126, 198];
-    const CX = 100, CY = 100, R_TIP = 97, R_MID = 40, RAY_W = 6.5;
-    const TIMING = { warmup: 620, perfect: 360, fadeOut: 430, trapIn: 610, trapHold: 720 };
-    const COL = { warmStart: [82, 45, 15], warmEnd: [255, 160, 35], perfect: [75, 255, 140], fadeStart: [255, 184, 72], fadeEnd: [110, 82, 30], trap: [255, 55, 70] };
-    const battleStartOverlay = document.getElementById("battle-start"), startBattleBtn = document.getElementById("start-battle-btn"), gameEl = document.getElementById("game"), enemyHPFill = document.getElementById("enemy-hp-fill"), heartsSection = document.getElementById("hearts-section"), notificationEl = document.getElementById("notification"), flashOverlay = document.getElementById("flash-overlay"), starSVG = document.getElementById("star-svg"), starContainer = document.getElementById("star-container"), centerBtn = document.getElementById("center-btn"),
-      gameOverOverlay = document.getElementById("game-over"), victoryOverlay = document.getElementById("victory"), enemyOrb = document.getElementById("enemy-orb"), comboValue = document.getElementById("combo-value"), gameoverResult = document.getElementById("gameover-result"), victoryResult = document.getElementById("victory-result");
-    const sliderGame = document.getElementById("slider-game"), sliderTrack = document.getElementById("slider-track"), sliderTimerFill = document.getElementById("slider-timer-fill"), sliderStatus = document.getElementById("slider-status"), sliderKnob = document.getElementById("slider-knob"), sliderMonster = document.getElementById("slider-monster");;
-    const SVG_NS = "http://www.w3.org/2000/svg";
-
-    // Переключение режима игры:
-    // "star"   — исходная мини-игра со звездой.
-    // "slider" — полоска с бегунком и несколькими зонами.
-    const GAME_MODE = "slider";
 
     const SLIDER_CONFIG = {
-      roundTime: 2600,          // время на все зоны одной волны, мс
-      minZones: 2,
-      maxZones: 4,
-      minZoneWidth: .13,        // ширина желтой зоны
-      maxZoneWidth: .19,
-      greenRatio: .20,          // зеленая часть внутри каждой обычной зоны
-      damageYellow: 7,
-      damageGreen: 24,
-      damageMiss: 1,
-      damageCritical: 45,
-      criticalZoneWidthMin: .035,
-      criticalZoneWidthMax: .035,
-      criticalGap: .025
+      roundTime: 2600, minZones: 2, maxZones: 4,
+      minZoneWidth: .13, maxZoneWidth: .19,
+      greenRatio: .20,
+      damageYellow: 7, damageGreen: 24, damageCritical: 45,
+      criticalZoneWidthMin: .035, criticalZoneWidthMax: .035, criticalGap: .025
     };
 
-    let rayBaseEls = [], rayHlEls = [], rayTipEls = [], swipeRects = [];
+    const sliderGame = document.getElementById("slider-game");
+    const sliderTrack = document.getElementById("slider-track");
+    const sliderTimerFill = document.getElementById("slider-timer-fill");
+    const sliderStatus = document.getElementById("slider-status");
+    const sliderKnob = document.getElementById("slider-knob");
+    const sliderMonster = document.getElementById("slider-monster");
+    const enemyHPFill = document.getElementById("enemy-hp-fill");
+    const heartsSection = document.getElementById("hearts-section");
+    const notificationEl = document.getElementById("notification");
+    const flashOverlay = document.getElementById("flash-overlay");
+    const comboValue = document.getElementById("combo-value");
+    const gameOverOverlay = document.getElementById("game-over");
+    const victoryOverlay = document.getElementById("victory");
+    const battleStartOverlay = document.getElementById("battle-start");
+    const gameoverResult = document.getElementById("gameover-result");
+    const victoryResult = document.getElementById("victory-result");
+    const gameEl = document.getElementById("game");
 
-    function ptOnRay(angleDeg, radius, offset = 0) { const a = angleDeg * Math.PI / 180, p = a + Math.PI / 2; return [CX + Math.cos(a) * radius + Math.cos(p) * offset, CY + Math.sin(a) * radius + Math.sin(p) * offset] }
-    function rayPoints(angleDeg) {
-      const inner = R_MID - 5, outer = R_TIP + 5, half = RAY_W + 2;
-      return [[CX, CY], ptOnRay(angleDeg, inner, -half), ptOnRay(angleDeg, outer, 0),
-      ptOnRay(angleDeg, inner, half)].map(p => p.join(",")).join(" ")
-    }
-    function drawStar() {
-      starSVG.innerHTML = ""; rayBaseEls = []; rayHlEls = []; rayTipEls = []; swipeRects = [];
-      const defs = document.createElementNS(SVG_NS, "defs"); starSVG.appendChild(defs);
-      STAR_ANGLES.forEach((angle, i) => {
-        const pts = rayPoints(angle), [tx, ty] = ptOnRay(angle, R_TIP);
-        const grad = document.createElementNS(SVG_NS, "linearGradient"); grad.id = "slashGrad" + i; grad.setAttribute("gradientUnits", "userSpaceOnUse"); grad.setAttribute("x1", CX); grad.setAttribute("y1", CY); grad.setAttribute("x2", tx); grad.setAttribute("y2", ty);
-        grad.innerHTML = `<stop offset="0%" stop-color="rgba(255,255,255,.98)"/><stop offset="45%" stop-color="rgba(110,225,255,.9)"/><stop offset="100%" stop-color="rgba(110,225,255,0)"/>`; defs.appendChild(grad);
-        const clip = document.createElementNS(SVG_NS, "clipPath"); clip.id = "swipeClip" + i;
-        const rect = document.createElementNS(SVG_NS, "rect"); rect.setAttribute("x", CX); rect.setAttribute("y", CY - 150); rect.setAttribute("width", 0); rect.setAttribute("height", 300); rect.setAttribute("transform", `rotate(${angle} ${CX} ${CY})`); clip.appendChild(rect); defs.appendChild(clip); swipeRects.push(rect);
-        const base = document.createElementNS(SVG_NS, "polygon"); base.setAttribute("points", pts); base.setAttribute("class", "ray-base"); starSVG.appendChild(base); rayBaseEls.push(base);
-        const hl = document.createElementNS(SVG_NS, "polygon"); hl.setAttribute("points", pts); hl.setAttribute("fill", `url(#slashGrad${i})`); hl.setAttribute("clip-path", `url(#swipeClip${i})`); hl.setAttribute("class", "ray-hl"); starSVG.appendChild(hl); rayHlEls.push(hl);
-        // Larger architectural tip, visually connected to the ray.
-        const tip = document.createElementNS(SVG_NS, "polygon");
-        const a = angle * Math.PI / 180, ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux;
-        const tipLen = 10, tipW = 6;
-        const tipPts = [
-          [tx + ux * tipLen, ty + uy * tipLen],
-          [tx + px * tipW, ty + py * tipW],
-          [tx - ux * 4, ty - uy * 4],
-          [tx - px * tipW, ty - py * tipW]
-        ].map(p => p.join(",")).join(" ");
-        tip.setAttribute("points", tipPts); tip.setAttribute("class", "ray-tip");
-        starSVG.appendChild(tip); rayTipEls.push(tip);
-      });
-    }
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const rgbStr = c => `rgb(${c[0]},${c[1]},${c[2]})`;
-    const lerpColor = (a, b, t) => rgbStr([Math.round(lerp(a[0], b[0], t)), Math.round(lerp(a[1], b[1], t)), Math.round(lerp(a[2], b[2], t))]);
-
+    // ==================== AUDIO / HAPTIC ====================
     function initAudio() {
       if (state.audio) return;
-      try { state.audio = new (window.AudioContext || window.webkitAudioContext)() } catch (e) { }
+      try { state.audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
     }
     function tone(freq, dur = .06, type = "sine", gain = .035) {
       if (!state.audio) return;
       const o = state.audio.createOscillator(), g = state.audio.createGain(), now = state.audio.currentTime;
-      o.type = type; o.frequency.setValueAtTime(freq, now); g.gain.setValueAtTime(gain, now); g.gain.exponentialRampToValueAtTime(.001, now + dur); o.connect(g); g.connect(state.audio.destination); o.start(now); o.stop(now + dur + .02);
+      o.type = type; o.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(gain, now); g.gain.exponentialRampToValueAtTime(.001, now + dur);
+      o.connect(g); g.connect(state.audio.destination);
+      o.start(now); o.stop(now + dur + .02);
     }
-    function haptic(ms = 12) { if (navigator.vibrate) navigator.vibrate(ms) }
-    function cueTick(p) { tone(280 + p * 170, .035, "sine", .018); haptic(5) }
-    function hitSound(perfect = false) { tone(perfect ? 760 : 480, perfect ? .12 : .07, perfect ? "triangle" : "square", perfect ? .055 : .03); if (perfect) { setTimeout(() => tone(1120, .1, "triangle", .035), 35); haptic([12, 28, 12]) } else haptic(8) }
+    function haptic(ms = 12) { if (navigator.vibrate) navigator.vibrate(ms); }
+    function hitSound(perfect = false) {
+      tone(perfect ? 760 : 480, perfect ? .12 : .07, perfect ? "triangle" : "square", perfect ? .055 : .03);
+      if (perfect) { setTimeout(() => tone(1120, .1, "triangle", .035), 35); haptic([12, 28, 12]); }
+      else haptic(8);
+    }
 
+    const telemetry = {
+      queue: [],
+      seq: 0,
+      flushTimer: null,
+      lastMoveAt: 0,
+      lastMoveX: null,
+      lastMoveY: null,
+      inInputZone: false,
+      active: false,
+      stopped: false,
+      listenersBound: false,
+      lastInput: null,
+      flushInFlight: null,
+    };
+
+    function telemetryId() {
+      if (crypto?.randomUUID) return crypto.randomUUID();
+      return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+
+    function telemetryRecord(kind, e = null, extra = {}) {
+      if (!telemetry.active || telemetry.stopped) return;
+      const now = Date.now();
+      const item = {
+        id: telemetryId(),
+        seq: ++telemetry.seq,
+        kind,
+        client_ts: now,
+        x: null,
+        y: null,
+        pointer_type: null,
+        pressure: null,
+        buttons: null,
+        key: null,
+        extra,
+      };
+
+      if (e) {
+        item.pointer_type = e.pointerType || null;
+        item.pressure = typeof e.pressure === "number" ? e.pressure : null;
+        item.buttons = typeof e.buttons === "number" ? e.buttons : null;
+        item.key = e.code || null;
+        item.extra = { ...extra, trusted: e.isTrusted !== false };
+        const rect = e.currentTarget?.getBoundingClientRect?.() ||
+          document.getElementById("input-zone")?.getBoundingClientRect?.();
+        if (rect && typeof e.clientX === "number") {
+          item.x = Math.max(0, Math.min(1, (e.clientX - rect.left) / Math.max(1, rect.width)));
+          item.y = Math.max(0, Math.min(1, (e.clientY - rect.top) / Math.max(1, rect.height)));
+        }
+      }
+      telemetry.queue.push(item);
+      if (kind === "pointerdown" || kind === "keydown") {
+        telemetry.lastInput = {
+          seq: item.seq,
+          kind,
+          ts: now,
+          trusted: e ? e.isTrusted !== false : null,
+          pointer_type: item.pointer_type,
+        };
+      }
+      if (telemetry.queue.length >= 20) void flushTelemetry(false);
+      return item.seq;
+    }
+
+    async function flushTelemetry(force = false) {
+      if (telemetry.flushInFlight) return telemetry.flushInFlight;
+      if (!apiReady || !battle || !telemetry.queue.length) return;
+      const batch = telemetry.queue.splice(0, 40);
+      telemetry.flushInFlight = (async () => {
+        try {
+          await apiRequest("/battle/telemetry", {
+            method: "POST",
+            body: JSON.stringify({ battle_id: battle.id, events: batch })
+          });
+        } catch (error) {
+          if (!telemetry.stopped) telemetry.queue.unshift(...batch.slice(-40));
+          if (force) console.warn("[telemetry] send failed", error);
+        } finally {
+          telemetry.flushInFlight = null;
+        }
+      })();
+      return telemetry.flushInFlight;
+    }
+
+    async function stopTelemetry() {
+      if (telemetry.stopped) return;
+      telemetry.stopped = true;
+      telemetry.active = false;
+      if (telemetry.flushTimer) {
+        clearInterval(telemetry.flushTimer);
+        telemetry.flushTimer = null;
+      }
+      await flushTelemetry(true);
+      telemetry.queue.length = 0;
+    }
+
+    function startTelemetry() {
+      if (telemetry.active && telemetry.flushTimer) return;
+      telemetry.active = true;
+      telemetry.stopped = false;
+      if (telemetry.flushTimer) clearInterval(telemetry.flushTimer);
+      telemetry.flushTimer = setInterval(() => {
+        if (!telemetry.active || telemetry.stopped) return;
+        void flushTelemetry(false);
+      }, 300);
+      if (!telemetry.listenersBound) {
+        telemetry.listenersBound = true;
+        document.addEventListener("visibilitychange", () =>
+          telemetryRecord(document.hidden ? "visibility_hidden" : "visibility_visible")
+        );
+        window.addEventListener("focus", () => telemetryRecord("focus"));
+        window.addEventListener("blur", () => telemetryRecord("blur"));
+        window.addEventListener("resize", () => telemetryRecord("resize", null, {
+          w: window.innerWidth, h: window.innerHeight,
+        }));
+
+        const zone = document.getElementById("input-zone");
+        if (zone) {
+          zone.addEventListener("pointerdown", e => telemetryRecord("pointerdown", e));
+          zone.addEventListener("pointerup", e => telemetryRecord("pointerup", e));
+          zone.addEventListener("pointercancel", e => telemetryRecord("pointercancel", e));
+          zone.addEventListener("pointermove", e => {
+            const now = performance.now();
+            if (now - telemetry.lastMoveAt < 50) return;
+            telemetry.lastMoveAt = now;
+            telemetryRecord("pointermove", e);
+          });
+        }
+        document.addEventListener("keydown", e => {
+          if (e.code === "Space") telemetryRecord("keydown", e);
+        }, { passive: true });
+      }
+      telemetryRecord("telemetry_start", null, { ua: navigator.userAgent.slice(0, 120) });
+      telemetry.lastInput = null;
+    }
+
+    window.addEventListener("pagehide", () => { void stopTelemetry(); });
+
+    // ==================== LOGGING ====================
     function gameLog(action, extra = {}) {
-      const entry = { seq: state.nextSeq++, ts: Date.now(), action, ...extra };
+      const entry = { seq: state.nextSeq++, ts: Date.now(), action, extra };
       state.log.push(entry);
-      console.debug("[battle-log]", entry);
-      if (state.log.length - state.logSent >= 10) void flushLogs(false);
+      if (state.log.length - state.logSent >= 10 || action === "start") void flushLogs(false);
     }
     async function flushLogs(force = false) {
-      if (logFlushInFlight || !apiReady || !battle || state.logSent >= state.log.length || (!force && state.log.length - state.logSent < 10)) return;
+      if (logFlushInFlight || !apiReady || !battle) return;
       logFlushInFlight = true;
       const start = state.logSent;
       const batch = state.log.slice(start);
@@ -977,10 +985,10 @@
       if (state.finishingPromise) return state.finishingPromise;
       if (state.finished || !apiReady || !battle) return false;
       state.finished = true;
-      gameLog(result === "victory" ? "victory" : "death", {
-        combo: state.bestCombo,
-        extra: { enemy_hp: state.enemyHP, max_hp: state.enemyMaxHP }
-      });
+      telemetryRecord("battle_end", null, { result });
+      await stopTelemetry();
+      gameLog(result === "death" ? "death" : "victory", { enemy_hp: state.enemyHP, max_hp: state.enemyMaxHP });
+      await flushLogs(true);
       state.finishingPromise = (async () => {
         try {
           const payload = await apiRequest("/battle/finish", {
@@ -988,7 +996,7 @@
             body: JSON.stringify({ result, logs: state.log })
           });
           state.logSent = state.log.length;
-          console.info("[battle] finish validation", payload.validation);
+          console.info("[battle] server validation:", payload.validation);
           return Boolean(payload.reward_allowed || payload.validation?.valid);
         } catch (error) {
           console.error("[battle] finish failed", error);
@@ -1001,69 +1009,71 @@
     }
     window.addEventListener("pagehide", () => { flushLogs(true); });
 
-    function startGame() {
-      state.finished = false; state.finishingPromise = null; state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0; logFlushInFlight = false;
-      clearTimeout(state.startTimer);
-      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
-      if (state.slider?.rafId) cancelAnimationFrame(state.slider.rafId);
+    // ==================== UI HELPERS ====================
+    function updateHeartsDisplay() {
+      heartsSection.querySelectorAll(".heart").forEach((h, i) => h.classList.toggle("lost", i >= state.playerHearts));
+    }
+    function updateEnemyHPDisplay() {
+      enemyHPFill.style.width = (state.enemyHP / state.enemyMaxHP * 100) + "%";
+    }
+    function updateCombo() { comboValue.textContent = "×" + state.combo; }
+    function showNotification(text, color) {
+      notificationEl.textContent = text; notificationEl.style.color = color;
+      notificationEl.classList.remove("show");
+      void notificationEl.offsetWidth;
+      notificationEl.classList.add("show");
+    }
+    function flashScreen() {
+      flashOverlay.classList.remove("flash"); void flashOverlay.offsetWidth;
+      flashOverlay.classList.add("flash");
+    }
+    function shakeScreen() {
+      gameEl.classList.remove("shake"); void gameEl.offsetWidth;
+      gameEl.classList.add("shake");
+    }
 
+    // ==================== GAMEPLAY ====================
+    function startGame() {
+      startTelemetry();
+      state.finished = false; state.finishingPromise = null;
+      state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0;
+      logFlushInFlight = false;
       state.playerHearts = 3;
       state.enemyHP = state.enemyMaxHP;
-      state.combo = 0;
-      state.bestCombo = 0;
-      state.isGameOver = false;
-      state.isVictory = false;
-      state.currentCue = null;
-      state.slider.active = false;
-      state.slider.drag = false;
-      state.slider.zones = [];
-
-      updateHeartsDisplay();
-      updateEnemyHPDisplay();
-      updateCombo();
-      clearCueVisuals();
+      state.combo = 0; state.bestCombo = 0;
+      state.isGameOver = false; state.isVictory = false;
+      state.slider.active = false; state.slider.zones = [];
+      updateHeartsDisplay(); updateEnemyHPDisplay(); updateCombo();
       stopSliderRound();
-
       gameOverOverlay.classList.remove("show");
       victoryOverlay.classList.remove("show");
       battleStartOverlay.classList.add("show");
-
-      if (GAME_MODE === "slider") {
-        starContainer.style.display = "none";
-        document.getElementById("timing-hint").style.display = "none";
-        sliderGame.classList.add("visible");
-      } else {
-        starContainer.style.display = "";
-        document.getElementById("timing-hint").style.display = "";
-        sliderGame.classList.remove("visible");
-      }
+      sliderGame.classList.add("visible");
     }
 
     function beginBattle() {
-      if (!apiReady || !battle) return; state.sessionStartedAt = Date.now();
-      gameLog("start", { extra: { battle_id: battle.id, game_mode: GAME_MODE, hp: state.enemyMaxHP } }); initAudio();
-      state.audio?.resume();
+      if (!apiReady || !battle) return;
+      state.sessionStartedAt = Date.now();
+      gameLog("start", { battle_id: battle.id, game_mode: "slider", hp: state.enemyMaxHP });
+      initAudio(); state.audio?.resume();
       battleStartOverlay.classList.remove("show");
-
-      clearTimeout(state.startTimer);
-      state.startTimer = setTimeout(() => {
+      setTimeout(() => {
         if (state.isGameOver || state.isVictory) return;
-        if (GAME_MODE === "slider") startSliderRound();
-        else spawnCue();
+        startSliderRound();
       }, 350);
     }
 
     function stopSliderRound() {
       state.slider.active = false;
-      state.slider.drag = false;
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
       state.slider.rafId = null;
       state.slider.zones = [];
+      state.slider.movementParams = null;
       sliderTrack.querySelectorAll(".slider-zone").forEach(el => el.remove());
       if (!sliderKnob.isConnected) sliderTrack.appendChild(sliderKnob);
       sliderTimerFill.style.width = "100%";
       sliderTimerFill.classList.remove("warn");
-      sliderStatus.textContent = "DRAG THE RUNNER AND RELEASE INSIDE A ZONE";
+      sliderStatus.textContent = "ТАП ДЛЯ АТАКИ";
     }
 
     function sliderDifficulty() {
@@ -1084,33 +1094,47 @@
         return x / 4294967296;
       };
     }
+
     function makeSliderZones() {
       const { zones: count } = sliderDifficulty();
-      const roundIndex = state.roundIndex;
-      const rng = seededRandom((battleSeed ^ Math.imul(roundIndex + 1, 0x9E3779B9)) >>> 0);
+      const rng = seededRandom((battleSeed ^ Math.imul(state.roundIndex + 1, 0x9E3779B9)) >>> 0);
       const zones = [];
       let attempts = 0;
-
       while (zones.length < count && attempts++ < 500) {
         const width = SLIDER_CONFIG.minZoneWidth + rng() * (SLIDER_CONFIG.maxZoneWidth - SLIDER_CONFIG.minZoneWidth);
         const left = .03 + rng() * (.94 - width);
         const candidate = { left, right: left + width, width, hit: false, required: true, critical: false };
-        const separated = zones.every(z => candidate.right + .035 < z.left || candidate.left - .035 > z.right);
-        if (separated) zones.push(candidate);
+        if (zones.every(z => candidate.right + .035 < z.left || candidate.left - .035 > z.right)) zones.push(candidate);
       }
-
       let critical = null;
       for (let i = 0; i < 500 && !critical; i++) {
-        const width = SLIDER_CONFIG.criticalZoneWidthMin + rng() * (SLIDER_CONFIG.criticalZoneWidthMax - SLIDER_CONFIG.criticalZoneWidthMin);
+        const width = SLIDER_CONFIG.criticalZoneWidthMin;
         const left = .02 + rng() * (.96 - width);
         const candidate = { left, right: left + width, width, hit: false, required: false, critical: true };
-        const separated = zones.every(z => candidate.right + SLIDER_CONFIG.criticalGap < z.left || candidate.left - SLIDER_CONFIG.criticalGap > z.right);
-        if (separated) critical = candidate;
+        if (zones.every(z => candidate.right + SLIDER_CONFIG.criticalGap < z.left || candidate.left - SLIDER_CONFIG.criticalGap > z.right)) {
+          critical = candidate;
+        }
       }
-
       if (critical) zones.push(critical);
       zones.sort((a, b) => a.left - b.left);
       return zones;
+    }
+
+    function calculateRunnerPosition(elapsed, params) {
+      const travelTime = params.travel_time;
+      const basePos = (elapsed % travelTime) / travelTime;
+
+      const noise1 = params.noise_amplitude * Math.sin(
+        2 * Math.PI * params.noise_frequency * elapsed / 1000 +
+        params.noise_phase
+      );
+
+      const noise2 = params.noise2_amplitude * Math.sin(
+        2 * Math.PI * params.noise2_frequency * elapsed / 1000 +
+        params.noise2_phase
+      );
+
+      return Math.max(0, Math.min(1, basePos + noise1 + noise2));
     }
 
     function renderSliderZones() {
@@ -1121,10 +1145,7 @@
         el.dataset.zone = i;
         el.style.left = (z.left * 100) + "%";
         el.style.width = (z.width * 100) + "%";
-        if (z.critical) {
-          el.setAttribute("aria-label", "Критический удар");
-          el.title = "КРИТИЧЕСКИЙ УДАР";
-        } else {
+        if (!z.critical) {
           const green = document.createElement("div");
           green.className = "zone-green";
           el.appendChild(green);
@@ -1132,18 +1153,30 @@
         sliderTrack.appendChild(el);
         z.el = el;
       });
-      if (!sliderKnob.isConnected) sliderTrack.appendChild(sliderKnob);
     }
 
     function startSliderRound() {
       if (state.isGameOver || state.isVictory) return;
       state.roundIndex++;
       state.slider.zones = makeSliderZones();
-      gameLog("round", { extra: { round: state.roundIndex, zones: state.slider.zones.map(z => ({ left: z.left, right: z.right, critical: z.critical, required: z.required })), difficulty: state.difficulty } });
+
+      const roundStartUnix = Date.now();
+
+      gameLog("round", {
+        round: state.roundIndex,
+        zones: state.slider.zones.map(z => ({
+          left: z.left, right: z.right,
+          critical: z.critical, required: z.required
+        })),
+        difficulty: state.difficulty,
+        round_start: roundStartUnix,
+      });
+
       state.slider.position = 0;
-      state.slider.roundStart = performance.now();
+      state.slider.roundStartUnix = roundStartUnix;
+      state.slider.roundStartPerf = performance.now();
       state.slider.active = true;
-      state.slider.drag = false;
+
       renderSliderZones();
       setSliderPosition(0);
       const requiredCount = state.slider.zones.filter(z => z.required).length;
@@ -1151,22 +1184,41 @@
       runSliderRound();
     }
 
-    function runSliderTimer() {
-      const roundStart = state.slider.roundStart;
+    function runSliderRound() {
+      const roundStartPerf = state.slider.roundStartPerf;
+      const roundStartUnix = state.slider.roundStartUnix;
+      const total = sliderDifficulty().time;
+      const travelTime = Math.max(700, 1450 / state.difficulty);
+
       function frame(now) {
-        if (!state.slider.active || state.isGameOver || state.isVictory || roundStart !== state.slider.roundStart) return;
-        const total = sliderDifficulty().time;
-        const left = Math.max(0, total - (now - roundStart));
+        if (!state.slider.active || state.isGameOver || state.isVictory ||
+          roundStartPerf !== state.slider.roundStartPerf) return;
+
+        const elapsedPerf = now - roundStartPerf;
+        const left = Math.max(0, total - elapsedPerf);
         const ratio = left / total;
+        const pos = (elapsedPerf % travelTime) / travelTime;
+        setSliderPosition(pos);
+
         sliderTimerFill.style.width = (ratio * 100) + "%";
         sliderTimerFill.classList.toggle("warn", ratio < .28);
+
+        state.slider.zones.forEach(z => {
+          const inside = !z.hit && state.slider.position >= z.left && state.slider.position <= z.right;
+          z.el?.classList.toggle("active", inside);
+        });
+
         if (left <= 0) {
           state.slider.active = false;
           state.slider.rafId = null;
-          sliderStatus.textContent = "TIME OUT"; gameLog("miss", { extra: { reason: "timeout" } });
+          sliderTimerFill.style.width = "0%";
+          sliderStatus.textContent = "TIME OUT";
+          gameLog("damage", { reason: "timeout" });
+          state.combo = 0; updateCombo();
           showNotification("TIME OUT!", "#ff3344");
           damagePlayer();
-          if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 180);
+          hitSound(false);
+          if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
           return;
         }
         state.slider.rafId = requestAnimationFrame(frame);
@@ -1175,29 +1227,41 @@
     }
 
     function setSliderPosition(pos) {
-      const nextPosition = Math.max(0, Math.min(1, pos));
-      if (state.slider.active && Math.abs(nextPosition - state.slider.position) >= 0.03) gameLog("move", { x: Number(nextPosition.toFixed(4)), extra: { round_start: state.slider.roundStart } });
-      state.slider.position = nextPosition; sliderKnob.style.left = (state.slider.position * 100) + "%";
-
-      const inside = state.slider.zones.some(z =>
-        !z.hit && state.slider.position >= z.left && state.slider.position <= z.right
-      );
+      state.slider.position = Math.max(0, Math.min(1, pos));
+      sliderKnob.style.left = (state.slider.position * 100) + "%";
     }
 
-    function resolveSliderHit() {
+    function resolveSliderHit(sourceEvent = null) {
       if (!state.slider.active || state.isGameOver || state.isVictory) return;
 
-      const pos = state.slider.position;
-      const zoneIndex = state.slider.zones.findIndex(z =>
-        !z.hit && pos >= z.left && pos <= z.right
-      );
+      const input = sourceEvent ? telemetry.lastInput : null;
+      const tapInputAge = input ? Math.max(0, Date.now() - input.ts) : null;
+      const inputSeq = input && tapInputAge <= 1500 ? input.seq : null;
+      const inputKind = input && tapInputAge <= 1500 ? input.kind : null;
+      const inputTrusted = input && tapInputAge <= 1500 ? input.trusted : null;
 
-      // Нажатие вне любой зоны = промах и урон игроку.
+      const nowUnix = Date.now();
+      const elapsedUnix = nowUnix - state.slider.roundStartUnix;
+      const travelTime = Math.max(700, 1450 / state.difficulty);
+      const pos = (elapsedUnix % travelTime) / travelTime;
+
+      const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
+
+      gameLog("tap", {
+        input_seq: inputSeq,
+        input_kind: inputKind,
+        input_age_ms: tapInputAge,
+        input_trusted: inputTrusted,
+        source: sourceEvent ? (sourceEvent.code === "Space" ? "keyboard" : "pointer") : "programmatic"
+      });
+
       if (zoneIndex < 0) {
         state.slider.active = false;
-        state.combo = 0;
-        updateCombo();
+        state.combo = 0; updateCombo();
         showNotification("ПРОМАХ!", "#ff3344");
+
+        gameLog("damage", { reason: "miss" });
+
         damagePlayer();
         hitSound(false);
         if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
@@ -1206,46 +1270,44 @@
 
       const z = state.slider.zones[zoneIndex];
       z.hit = true;
+      sliderTrack.querySelector(`[data-zone="${zoneIndex}"]`)?.classList.add("hit");
 
-      const zoneEl = sliderTrack.querySelector(`[data-zone="${zoneIndex}"]`);
-      zoneEl?.classList.add("hit");
-
-      // Оранжевая зона — отдельный риск/награда и не влияет
-      // на условие завершения раунда.
       if (z.critical) {
-        state.combo++;
-        state.bestCombo = Math.max(state.bestCombo, state.combo);
+        state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
         updateCombo();
-
-        gameLog("zone_hit", { zone: String(zoneIndex), x: Number(pos.toFixed(4)), combo: state.combo, extra: { critical: true, damage: SLIDER_CONFIG.damageCritical } });
         damageEnemy(SLIDER_CONFIG.damageCritical);
         showNotification(`-${SLIDER_CONFIG.damageCritical} КРИТ!`, "#ff7a00");
         flashScreen();
-
-        sliderMonster.classList.remove("hit");
-        void sliderMonster.offsetWidth;
-        sliderMonster.classList.add("hit");
-
-        // Для критического попадания используем более высокий звук.
+        sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
         tone(980, .11, "sawtooth", .05);
         setTimeout(() => tone(1480, .12, "triangle", .04), 35);
         haptic([18, 35, 18]);
 
-        // Если обязательные зоны уже закрыты, раунд заканчивается сразу.
-        const requiredLeft = state.slider.zones.filter(z => z.required && !z.hit).length;
+        const newRoundStartUnix = Date.now();
+        state.slider.roundStartPerf = performance.now();
+        state.slider.roundStartUnix = newRoundStartUnix;
+
+        gameLog("round", {
+          round: state.roundIndex,
+          zones: state.slider.zones.map(z => ({
+            left: z.left, right: z.right,
+            critical: z.critical, required: z.required,
+            hit: z.hit
+          })),
+          difficulty: state.difficulty,
+          round_start: newRoundStartUnix,
+          timer_reset: true,
+        });
+
+        const requiredLeft = state.slider.zones.filter(zz => zz.required && !zz.hit).length;
         if (requiredLeft === 0) {
           state.slider.active = false;
           if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
           state.slider.rafId = null;
-          sliderStatus.textContent = "ALL REQUIRED ZONES CLEARED";
-          sliderTimerFill.style.width = "100%";
-
-          if (!state.isGameOver && !state.isVictory) {
-            setTimeout(startSliderRound, 220);
-          }
+          if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
         } else {
-          sliderStatus.textContent = `ZONES LEFT: ${requiredLeft} • ORANGE OPTIONAL`;
-          state.slider.roundStart = performance.now();
+          if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
+          state.slider.rafId = null;
           sliderTimerFill.style.width = "100%";
           sliderTimerFill.classList.remove("warn");
           sliderStatus.textContent = `TIMER RESET • ZONES LEFT: ${requiredLeft}`;
@@ -1254,257 +1316,64 @@
         return;
       }
 
-      // Обычная зона: старое поведение и расчет урона сохраняются.
       const center = (z.left + z.right) / 2;
       const half = z.width / 2;
       const accuracy = Math.max(0, 1 - Math.abs(pos - center) / half);
-      const greenHalf = (z.width * SLIDER_CONFIG.greenRatio) / 2;
-      const inGreen = Math.abs(pos - center) <= greenHalf;
+      const amount = Math.round(SLIDER_CONFIG.damageYellow + (SLIDER_CONFIG.damageGreen - SLIDER_CONFIG.damageYellow) * accuracy);
+      const inGreen = Math.abs(pos - center) <= (z.width * SLIDER_CONFIG.greenRatio) / 2;
 
-      const amount = Math.round(
-        SLIDER_CONFIG.damageYellow +
-        (SLIDER_CONFIG.damageGreen - SLIDER_CONFIG.damageYellow) * accuracy
-      );
-
-      state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo); updateCombo();
-      gameLog("zone_hit", { zone: String(zoneIndex), x: Number(pos.toFixed(4)), combo: state.combo, extra: { critical: false, damage: amount, accuracy: Number(accuracy.toFixed(4)), in_green: inGreen } });
+      state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
+      updateCombo();
       damageEnemy(amount);
-      showNotification(
-        `-${amount}`,
-        inGreen ? "#63b85b" : "#e5c448"
-      );
-
-      sliderMonster.classList.remove("hit");
-      void sliderMonster.offsetWidth;
-      sliderMonster.classList.add("hit");
-
+      showNotification(`-${amount}`, inGreen ? "#63b85b" : "#e5c448");
+      sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
       hitSound(inGreen);
 
-      // Только обычные (required) зоны определяют завершение раунда.
-      const requiredLeft = state.slider.zones.filter(z => z.required && !z.hit).length;
+      const requiredLeft = state.slider.zones.filter(zz => zz.required && !zz.hit).length;
       if (requiredLeft === 0) {
         state.slider.active = false;
         if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
         state.slider.rafId = null;
-        sliderStatus.textContent = "ALL REQUIRED ZONES CLEARED";
-        sliderTimerFill.style.width = "100%";
-
-        if (!state.isGameOver && !state.isVictory) {
-          setTimeout(startSliderRound, 220);
-        }
+        if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
       } else {
-        const optionalLeft = state.slider.zones.some(z => !z.required && !z.hit);
-        sliderStatus.textContent =
-          `ZONES LEFT: ${requiredLeft}` + (optionalLeft ? " • ORANGE OPTIONAL" : "");
+        sliderStatus.textContent = `ZONES LEFT: ${requiredLeft}`;
       }
     }
 
-    function runSliderRound() {
-      const roundStart = state.slider.roundStart;
-      const total = sliderDifficulty().time;
-      const travelTime = Math.max(700, 1450 / state.difficulty);
-
-      function frame(now) {
-        if (!state.slider.active || state.isGameOver || state.isVictory ||
-          roundStart !== state.slider.roundStart) return;
-
-        const elapsed = now - roundStart;
-        const left = Math.max(0, total - elapsed);
-        const ratio = left / total;
-
-        const pos = (elapsed % travelTime) / travelTime;
-        setSliderPosition(pos);
-
-        sliderTimerFill.style.width = (ratio * 100) + "%";
-        sliderTimerFill.classList.toggle("warn", ratio < .28);
-
-        state.slider.zones.forEach(z => {
-          const inside = !z.hit &&
-            state.slider.position >= z.left &&
-            state.slider.position <= z.right;
-          z.el?.classList.toggle("active", inside);
-        });
-
-        if (left <= 0) {
-          state.slider.active = false;
-          state.slider.rafId = null;
-          sliderTimerFill.style.width = "0%";
-          sliderStatus.textContent = "TIME OUT"; gameLog("miss", { extra: { reason: "timeout" } });
-          state.combo = 0;
-          updateCombo();
-          showNotification("TIME OUT!", "#ff3344");
-          damagePlayer();
-          hitSound(false);
-
-          if (!state.isGameOver && !state.isVictory) {
-            setTimeout(startSliderRound, 220);
-          }
-          return;
-        }
-
-        state.slider.rafId = requestAnimationFrame(frame);
-      }
-
-      state.slider.rafId = requestAnimationFrame(frame);
+    function damageEnemy(amount) {
+      state.enemyHP = Math.max(0, state.enemyHP - amount);
+      updateEnemyHPDisplay();
+      if (state.enemyHP <= 0) victory();
     }
-
-    function spawnCue() {
-      if (state.isGameOver || state.isVictory) return;
-      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
-      let target = Math.floor(Math.random() * 6);
-      if (target === state.lastCueTarget) target = (target + 1 + Math.floor(Math.random() * 5)) % 6;
-      state.lastCueTarget = target;
-      state.currentCue = { target, isFeint: Math.random() < Math.min(.28, .10 + (state.difficulty - 1) * .35), phase: "WARMUP", startTime: performance.now(), resolved: false, rafId: null, lastTick: 0 };
-      startCueLoop();
+    function damagePlayer() {
+      state.playerHearts--;
+      const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`);
+      if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400); }
+      updateHeartsDisplay(); shakeScreen();
+      if (state.playerHearts <= 0) gameOver();
     }
-    function timings() {
-      const k = 1 / state.difficulty;
-      return { warmup: Math.max(340, TIMING.warmup * k), perfect: Math.max(240, TIMING.perfect * k), fadeOut: Math.max(280, TIMING.fadeOut * k), trapIn: Math.max(340, TIMING.trapIn * k), trapHold: Math.max(400, TIMING.trapHold * k) }
-    }
-    function computePhase(cue, elapsed, t) {
-      if (cue.isFeint) {
-        if (elapsed < t.trapIn) return { phase: "WARMUP", progress: elapsed / t.trapIn };
-        if (elapsed < t.trapIn + t.trapHold) return { phase: "TRAP", progress: (elapsed - t.trapIn) / t.trapHold };
-        return { phase: "DONE", progress: 1 };
-      }
-      if (elapsed < t.warmup) return { phase: "WARMUP", progress: elapsed / t.warmup };
-      if (elapsed < t.warmup + t.perfect) return { phase: "PERFECT", progress: (elapsed - t.warmup) / t.perfect };
-      if (elapsed < t.warmup + t.perfect + t.fadeOut) return { phase: "FADEOUT", progress: (elapsed - t.warmup - t.perfect) / t.fadeOut };
-      return { phase: "DONE", progress: 1 };
-    }
-    function startCueLoop() {
-      const cue = state.currentCue, t = timings();
-      function frame(now) {
-        if (!state.currentCue || state.currentCue !== cue || cue.resolved) return;
-        const elapsed = now - cue.startTime, { phase, progress } = computePhase(cue, elapsed, t); cue.phase = phase;
-        applyCueVisuals(cue, phase, progress);
-        const tickEvery = phase === "WARMUP" ? Math.max(90, 170 / state.difficulty) : phase === "PERFECT" ? Math.max(65, 105 / state.difficulty) : 120;
-        if (now - cue.lastTick > tickEvery) { cue.lastTick = now; cueTick(progress) }
-        if (phase === "DONE") { if (!cue.isFeint) handleMiss(); endCue(); return }
-        cue.rafId = requestAnimationFrame(frame);
-      }
-      cue.rafId = requestAnimationFrame(frame);
-    }
-    function applyCueVisuals(cue, phase, p) {
-      let fill, glow, opacity, glowPx;
-      if (phase === "WARMUP") {
-        fill = lerpColor(COL.warmStart, COL.warmEnd, p); opacity = lerp(.38, 1, p); glowPx = lerp(1, 12, p); glow = `rgba(255,168,40,${lerp(.12, .9, p).toFixed(2)})`;
-      } else if (phase === "PERFECT") {
-        fill = rgbStr(COL.perfect); opacity = 1;
-        const pulse = .55 + .45 * Math.sin(p * Math.PI * 4); glowPx = 7 + 7 * pulse; glow = `rgba(68,255,136,${(.5 + .42 * pulse).toFixed(2)})`;
-      } else if (phase === "FADEOUT") {
-        fill = lerpColor(COL.fadeStart, COL.fadeEnd, p); opacity = lerp(.95, .18, p); glowPx = lerp(6, 0, p); glow = `rgba(255,190,80,${lerp(.38, 0, p).toFixed(2)})`;
-      } else {
-        fill = rgbStr(COL.trap); opacity = 1; const pulse = .5 + .5 * Math.sin(p * Math.PI * 6); glowPx = 5 + 7 * pulse; glow = `rgba(255,51,68,${(.5 + .45 * pulse).toFixed(2)})`;
-      }
-      setCueStyle(cue.target, fill, glow, opacity, glowPx);
-    }
-    function setCueStyle(target, fill, glow, opacity, glowPx) {
-      const props = { "--c-fill": fill, "--c-glow": glow, "--c-opacity": opacity.toFixed(2), "--c-glowpx": glowPx.toFixed(1) + "px" };
-      if (target < 5) { const el = rayBaseEls[target]; el.classList.add("cue-active"); Object.entries(props).forEach(([k, v]) => el.style.setProperty(k, v)); rayTipEls[target].style.setProperty("--c-fill", fill); rayTipEls[target].style.setProperty("--c-glow", glow) }
-      else { centerBtn.classList.add("cue-active"); Object.entries(props).forEach(([k, v]) => centerBtn.style.setProperty(k, v)) }
-    }
-    function clearCueVisuals() {
-      rayBaseEls.forEach(el => { el.classList.remove("cue-active"); el.removeAttribute("style") });
-      rayTipEls.forEach(el => el.removeAttribute("style"));
-      centerBtn.classList.remove("cue-active"); centerBtn.removeAttribute("style");
-    }
-    function endCue() {
-      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
-      clearCueVisuals(); state.currentCue = null;
-      setTimeout(() => { if (!state.isGameOver && !state.isVictory) spawnCue() }, 90);
-    }
-
-    function handleInput(targetIndex) {
-      initAudio(); state.audio?.resume();
-      const cue = state.currentCue; if (!cue || cue.resolved || state.isGameOver || state.isVictory) return;
-      if (cue.isFeint) {
-        cue.resolved = true; state.combo = 0; updateCombo(); showNotification("DAMAGED!", "#ff3344"); damagePlayer(); hitSound(false); endCue(); return;
-      }
-      if (cue.target !== targetIndex) return;
-      cue.resolved = true;
-      if (cue.phase === "WARMUP") {
-        state.combo = 0; updateCombo(); showNotification("EARLY!", "#ffa040"); damageEnemy(5); hitSound(false);
-      } else if (cue.phase === "PERFECT") {
-        state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo); updateCombo();
-        const amount = Math.min(50, 25 + Math.max(0, state.combo - 1) * 3);
-        showNotification(state.combo >= 3 ? `PERFECT ×${state.combo}` : "PERFECT!", "#44ff88");
-        damageEnemy(amount); flashScreen(); hitSound(true);
-      } else if (cue.phase === "FADEOUT") {
-        state.combo = 0; updateCombo(); showNotification("GOOD!", "#d7c46c"); damageEnemy(10); hitSound(false);
-      }
-      endCue();
-    }
-    function handleMiss() { state.combo = 0; updateCombo(); showNotification("ПРОМАХ!", "#ff3344"); damagePlayer(); hitSound(false) }
-    function damageEnemy(amount) { state.enemyHP = Math.max(0, state.enemyHP - amount); updateEnemyHPDisplay(); enemyOrb.parentElement.classList.remove("hit"); void enemyOrb.parentElement.offsetWidth; enemyOrb.parentElement.classList.add("hit"); if (state.enemyHP <= 0) victory() }
-    function damagePlayer() { state.playerHearts--; gameLog("damage", { extra: { hearts: state.playerHearts } }); const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`); if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400) } updateHeartsDisplay(); shakeScreen(); if (state.playerHearts <= 0) gameOver() }
     async function victory() {
       state.isVictory = true; state.slider.active = false;
-      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
-      clearCueVisuals();
       await finishBattle("victory");
       victoryResult.innerHTML = `<h2><b>+💰${tg_data.money_drop}</b></h2> ${tg_data.items_drop.join('<br>') + '<br>'}`;
       setTimeout(() => victoryOverlay.classList.add("show"), 450);
     }
-
     async function gameOver() {
       state.isGameOver = true; state.slider.active = false;
-      if (state.currentCue?.rafId) cancelAnimationFrame(state.currentCue.rafId);
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
-      clearCueVisuals();
       await finishBattle("death");
       gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`;
       setTimeout(() => gameOverOverlay.classList.add("show"), 450);
     }
-    function updateHeartsDisplay() { heartsSection.querySelectorAll(".heart").forEach((h, i) => h.classList.toggle("lost", i >= state.playerHearts)) }
-    function updateEnemyHPDisplay() { enemyHPFill.style.width = (state.enemyHP / state.enemyMaxHP * 100) + "%" }
-    function updateCombo() { comboValue.textContent = "×" + state.combo }
-    function showNotification(text, color) { notificationEl.textContent = text; notificationEl.style.color = color; notificationEl.classList.remove("show"); void notificationEl.offsetWidth; notificationEl.classList.add("show") }
-    function flashScreen() { flashOverlay.classList.remove("flash"); void flashOverlay.offsetWidth; flashOverlay.classList.add("flash") }
-    function shakeScreen() { gameEl.classList.remove("shake"); void gameEl.offsetWidth; gameEl.classList.add("shake") }
 
-    function updateSwipeHighlight(x, y) {
-      const rect = starContainer.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const cxS = rect.left + rect.width / 2, cyS = rect.top + rect.height / 2, scale = rect.width / 200, px = (x - cxS) / scale, py = (y - cyS) / scale;
-      if (state.swipeStart) {
-        const dx = x - state.swipeStart.x, dy = y - state.swipeStart.y;
-        if (Math.hypot(dx, dy) > 14) {
-          const rayIdx = matchRay(dx, dy);
-          if (rayIdx >= 0) {
-            state.swipeRay = rayIdx; const a = STAR_ANGLES[rayIdx] * Math.PI / 180, proj = (px - CX) * Math.cos(a) + (py - CY) * Math.sin(a), progress = Math.max(0, Math.min(1, proj / R_TIP));
-            swipeRects[rayIdx].setAttribute("width", progress * (R_TIP + 5)); rayHlEls[rayIdx].classList.add("hl-on"); return;
-          }
-        }
-      }
-      hideSwipeHighlight(0);
-    }
-    function hideSwipeHighlight(delay = 80) { const idx = state.swipeRay; if (idx >= 0) { setTimeout(() => { rayHlEls[idx]?.classList.remove("hl-on"); swipeRects[idx]?.setAttribute("width", 0) }, delay); state.swipeRay = -1 } }
-    function slashFlash(i) { if (i < 0 || i > 4) return; swipeRects[i].setAttribute("width", R_TIP + 5); rayHlEls[i].classList.add("hl-on"); setTimeout(() => { rayHlEls[i].classList.remove("hl-on"); swipeRects[i].setAttribute("width", 0) }, 150) }
-    function matchRay(dx, dy) {
-      const angle = Math.atan2(dy, dx) * 180 / Math.PI; let closest = -1, minDiff = 999;
-      STAR_ANGLES.forEach((sa, i) => { let diff = Math.abs(((angle - sa + 540) % 360) - 180); if (diff < minDiff) { minDiff = diff; closest = i } });
-      const a = STAR_ANGLES[closest] * Math.PI / 180, outward = dx * Math.cos(a) + dy * Math.sin(a) > 0;
-      return minDiff <= 35 && outward ? closest : -1;
-    }
-    function processInput(endX, endY) {
-      if (!state.swipeStart) return;
-      const rect = starContainer.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-      const dx = endX - state.swipeStart.x, dy = endY - state.swipeStart.y, dist = Math.hypot(dx, dy), cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2, distToCenter = Math.hypot(endX - cx, endY - cy);
-      if (dist < 25 && distToCenter < rect.width * .18) { centerBtn.classList.remove("tap-ping"); void centerBtn.offsetWidth; centerBtn.classList.add("tap-ping"); hideSwipeHighlight(0); handleInput(5); return }
-      const rayIdx = dist >= 30 ? matchRay(dx, dy) : -1;
-      if (rayIdx >= 0) { slashFlash(rayIdx); handleInput(rayIdx) } else hideSwipeHighlight()
-    }
     async function restartBattle() {
       const retryBtn = document.getElementById("retry-btn");
       if (retryBtn.disabled || !battle) return;
       retryBtn.disabled = true;
       try {
         const payload = await apiRequest("/battle/restart", {
-          method: "POST",
-          body: JSON.stringify({ battle_id: battle.id })
+          method: "POST", body: JSON.stringify({ battle_id: battle.id })
         });
         if (!payload.battle) throw new Error("Battle restart returned no battle");
         battle = payload.battle;
@@ -1519,103 +1388,42 @@
         startGame();
         beginBattle();
       } catch (error) {
-        console.error("[battle] restart failed", error);
-        showNotification(error.message === "Not enough energy" ? "НЕТ ЭНЕРГИИ" : "НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
+        console.error("[battle] restart failed:", error);
+        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
       } finally {
         retryBtn.disabled = false;
       }
     }
 
+    // ==================== EVENTS ====================
     function setupEventListeners() {
       const zone = document.getElementById("input-zone");
-      zone.addEventListener("touchstart", e => {
-        if (GAME_MODE !== "star") return;
-        e.preventDefault();
-        e.stopPropagation();
-        initAudio();
-        const t = e.touches[0];
-        state.swipeStart = { x: t.clientX, y: t.clientY }
-      }, { passive: false });
-
-      zone.addEventListener("touchmove", e => {
-        if (GAME_MODE !== "star") return;
-        e.preventDefault();
-        e.stopPropagation();
-        const t = e.touches[0];
-        updateSwipeHighlight(t.clientX, t.clientY)
-      }, { passive: false });
-
-      zone.addEventListener("touchend", e => {
-        if (GAME_MODE !== "star") return;
-        e.preventDefault();
-        e.stopPropagation();
-        const t = e.changedTouches[0];
-        processInput(t.clientX, t.clientY);
-        state.swipeStart = null
-      }, { passive: false });
-
-      zone.addEventListener("touchcancel", () => {
-        if (GAME_MODE !== "star") return;
-        hideSwipeHighlight(0); state.swipeStart = null
-      });
-      zone.addEventListener("mousedown", e => {
-        if (GAME_MODE === "star") state.swipeStart = { x: e.clientX, y: e.clientY }
-      });
-      zone.addEventListener("mousemove", e => {
-        if (GAME_MODE === "star" && state.swipeStart) updateSwipeHighlight(e.clientX, e.clientY)
-      });
-      zone.addEventListener("mouseup", e => {
-        if (GAME_MODE === "star") {
-          processInput(e.clientX, e.clientY); state.swipeStart = null
-        }
-      });
-
-      // Slider mode: the runner moves automatically.
-      // The player only taps/clicks to attempt a hit.
       zone.addEventListener("pointerdown", e => {
-        if (GAME_MODE !== "slider") return;
         e.preventDefault();
-        resolveSliderHit();
+        resolveSliderHit(e);
       });
-
       document.addEventListener("keydown", e => {
-        if (e.code !== "Space" || GAME_MODE !== "slider") return;
-
-        const battleStarted = !battleStartOverlay.classList.contains("show");
-        if (!battleStarted) return;
-
+        if (e.code !== "Space") return;
+        if (battleStartOverlay.classList.contains("show")) return;
         e.preventDefault();
-        e.stopPropagation();
         if (e.repeat || !state.slider.active) return;
-
-        resolveSliderHit();
+        resolveSliderHit(e);
       }, { passive: false });
-
-      document.addEventListener("keyup", e => {
-        if (e.code !== "Space" || GAME_MODE !== "slider") return;
-        if (!battleStartOverlay.classList.contains("show")) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }, { passive: false });
-
-      startBattleBtn.addEventListener("click", beginBattle);
-
-      document.getElementById("restart-btn").addEventListener("click", () => {
-        tg.close();
-      });
-
-      document.getElementById("retry-btn").addEventListener("click", () => {
-        void restartBattle();
-      });
-
-      document.getElementById("next-btn").addEventListener("click", () => {
-        tg.close();
-      });
+      document.getElementById("start-battle-btn").addEventListener("click", beginBattle);
+      document.getElementById("end-btn").addEventListener("click", () => tg.close());
+      document.getElementById("retry-btn").addEventListener("click", () => void restartBattle());
+      document.getElementById("next-btn").addEventListener("click", () => tg.close());
     }
 
-    drawStar(); setupEventListeners();
+    setupEventListeners();
+    startTelemetry();
     (async () => { const loaded = await loadBattle(); if (loaded) startGame(); })();
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        window.location.reload();
+      }
+    });
   </script>
 </body>
 
