@@ -211,10 +211,57 @@
       min-height: 18px;
       text-align: center;
       font-weight: 800;
+      transition: transform 0.1s ease-out;
+    }
+
+    #combo.pulse {
+      animation: comboPulse var(--pulse-duration, 0.4s) ease-out;
+    }
+
+    @keyframes comboPulse {
+      0% {
+        transform: scale(1);
+      }
+
+      20% {
+        transform: scale(var(--pulse-scale, 1.2)) rotate(var(--pulse-rotate, -3deg));
+      }
+
+      40% {
+        transform: scale(var(--pulse-mid-scale, 1.15)) rotate(var(--pulse-rotate-mid, 2deg));
+      }
+
+      60% {
+        transform: scale(var(--pulse-mid-scale-2, 1.1)) rotate(var(--pulse-rotate-2, -1deg));
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     #combo b {
       color: #63b85b;
+      display: inline-block;
+      transition: transform 0.15s ease-out;
+    }
+
+    #combo.pulse b {
+      animation: comboValuePulse var(--pulse-duration, 0.4s) ease-out;
+    }
+
+    @keyframes comboValuePulse {
+      0% {
+        transform: scale(1);
+      }
+
+      30% {
+        transform: scale(var(--pulse-value-scale, 1.4));
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     #hearts-section {
@@ -229,18 +276,77 @@
     .heart {
       width: 50px;
       height: 50px;
+      padding: 4px;
+      box-sizing: content-box;
       transition: transform .2s, opacity .2s;
       shape-rendering: crispEdges;
       filter:
         drop-shadow(3px 0 0 #f3e7bd) drop-shadow(-3px 0 0 #f3e7bd) drop-shadow(0 3px 0 #f3e7bd) drop-shadow(0 -3px 0 #f3e7bd);
     }
 
+    .heart svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
     .heart.lost {
       opacity: .15;
+      filter: grayscale(1);
     }
 
     .heart.breaking {
       animation: heartBreak .35s ease-out;
+    }
+
+    .heart.last-heart:not(.lost) {
+      animation: heartShake 0.45s infinite;
+      filter:
+        drop-shadow(3px 0 0 #e95732) drop-shadow(-3px 0 0 #e95732) drop-shadow(0 3px 0 #e95732) drop-shadow(0 -3px 0 #e95732);
+    }
+
+    @keyframes heartShake {
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      10% {
+        transform: translate(-1.5px, -1px) rotate(-2deg);
+      }
+
+      20% {
+        transform: translate(1.5px, -1.5px) rotate(2deg);
+      }
+
+      30% {
+        transform: translate(-1px, 1.5px) rotate(-1deg);
+      }
+
+      40% {
+        transform: translate(1.5px, 1px) rotate(2deg);
+      }
+
+      50% {
+        transform: translate(-1.5px, -1.5px) rotate(-2deg);
+      }
+
+      60% {
+        transform: translate(1px, 0) rotate(1deg);
+      }
+
+      70% {
+        transform: translate(-1.5px, 1.5px) rotate(-2deg);
+      }
+
+      80% {
+        transform: translate(1.5px, -1px) rotate(2deg);
+      }
+
+      90% {
+        transform: translate(0, 1.5px) rotate(-1deg);
+      }
     }
 
     @keyframes heartBreak {
@@ -415,8 +521,10 @@
       position: absolute;
       top: 30%;
       left: 50%;
+      margin-left: var(--notif-x, 0px);
+      margin-top: var(--notif-y, 0px);
       transform: translate(-50%, -50%);
-      font-size: 29px;
+      font-size: var(--notif-size, 29px);
       font-weight: 900;
       letter-spacing: 3px;
       text-transform: uppercase;
@@ -1350,6 +1458,7 @@
       playerHearts: 3, enemyHP: 0, enemyMaxHP: 0,
       isGameOver: false, isVictory: false,
       difficulty: 1, combo: 0, bestCombo: 0, crit_damage: 0,
+      prevCombo: 0,
       audio: null,
       slider: {
         zones: [], position: 0, active: false,
@@ -1360,28 +1469,14 @@
     };
 
     let sliderConfig = {
-      round_time_base_ms: 2600,
-      round_time_decay_per_diff: 550,
-      round_time_min_ms: 1350,
-      travel_time_base: 1450,
-      travel_time_min: 700,
-      min_zone_width: 0.13,
-      max_zone_width: 0.19,
-      min_zone_left: 0.03,
-      max_zone_left_bound: 0.94,
-      zone_gap: 0.035,
-      critical_zone_width: 0.035,
-      critical_min_left: 0.02,
-      critical_max_left_bound: 0.96,
-      critical_gap: 0.025,
-      max_zones: 4,
-      base_zones: 2,
-      difficulty_zone_multiplier: 8,
-      difficulty_zone_divisor: 3,
-      damageYellow: 7,
-      damageGreen: 24,
-      damageCritical: 45,
-      greenRatio: 0.20
+      round_time_base_ms: 2600, round_time_decay_per_diff: 550, round_time_min_ms: 1350,
+      travel_time_base: 1450, travel_time_min: 700,
+      min_zone_width: 0.13, max_zone_width: 0.19, min_zone_left: 0.03, max_zone_left_bound: 0.94, zone_gap: 0.035,
+      critical_zone_width: 0.045,
+      critical_min_left: 0.02, critical_max_left_bound: 0.96, critical_gap: 0.025,
+      critical_zone_chance: 0.35,
+      max_zones: 4, base_zones: 2, difficulty_zone_multiplier: 8, difficulty_zone_divisor: 3,
+      damageYellow: 7, damageGreen: 24, damageCritical: 45, greenRatio: 0.20
     };
 
     const sliderGame = document.getElementById("slider-game");
@@ -1417,14 +1512,109 @@
       o.start(now); o.stop(now + dur + .02);
     }
 
-    function haptic(ms = 12) {
-      if (navigator.vibrate) navigator.vibrate(ms);
+    function haptic(ms = 12) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+    function hitSound(perfect = false, damage = 0) {
+      if (!state.audio) return;
+      const now = state.audio.currentTime;
+
+      if (perfect) {
+        // КРИТ: резкий "clang" с гармониками
+        const osc1 = state.audio.createOscillator();
+        const osc2 = state.audio.createOscillator();
+        const gain = state.audio.createGain();
+
+        osc1.type = "sawtooth";
+        osc1.frequency.setValueAtTime(880, now);
+        osc1.frequency.exponentialRampToValueAtTime(220, now + 0.18);
+
+        osc2.type = "square";
+        osc2.frequency.setValueAtTime(1320, now);
+        osc2.frequency.exponentialRampToValueAtTime(440, now + 0.12);
+
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+        osc1.connect(gain); osc2.connect(gain);
+        gain.connect(state.audio.destination);
+
+        osc1.start(now); osc2.start(now);
+        osc1.stop(now + 0.25); osc2.stop(now + 0.25);
+
+        // Добавляем звонкую гармонику через 35мс
+        setTimeout(() => {
+          if (!state.audio) return;
+          const t = state.audio.currentTime;
+          const osc3 = state.audio.createOscillator();
+          const g3 = state.audio.createGain();
+          osc3.type = "triangle";
+          osc3.frequency.setValueAtTime(1760, t);
+          osc3.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+          g3.gain.setValueAtTime(0.05, t);
+          g3.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+          osc3.connect(g3); g3.connect(state.audio.destination);
+          osc3.start(t); osc3.stop(t + 0.15);
+        }, 35);
+
+        haptic([18, 35, 18]);
+      } else {
+        // ОБЫЧНЫЙ УДАР: "thud" с pitch drop
+        const baseFreq = 280 + (damage / 24) * 200;
+
+        const osc = state.audio.createOscillator();
+        const gain = state.audio.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.4, now + 0.08);
+
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(gain); gain.connect(state.audio.destination);
+        osc.start(now); osc.stop(now + 0.13);
+
+        // Дополнительный "шум" для текстурности
+        const osc2 = state.audio.createOscillator();
+        const gain2 = state.audio.createGain();
+        osc2.type = "sawtooth";
+        osc2.frequency.setValueAtTime(baseFreq * 1.5, now);
+        osc2.frequency.exponentialRampToValueAtTime(60, now + 0.05);
+        gain2.gain.setValueAtTime(0.02, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc2.connect(gain2); gain2.connect(state.audio.destination);
+        osc2.start(now); osc2.stop(now + 0.09);
+
+        haptic(8);
+      }
     }
 
-    function hitSound(perfect = false) {
-      tone(perfect ? 760 : 480, perfect ? .12 : .07, perfect ? "triangle" : "square", perfect ? .055 : .03);
-      if (perfect) { setTimeout(() => tone(1120, .1, "triangle", .035), 35); haptic([12, 28, 12]); }
-      else haptic(8);
+    function hurtSound() {
+      if (!state.audio) return;
+      const now = state.audio.currentTime;
+
+      // УРОН ПО ИГРОКУ: низкочастотный "crunch" + "crack"
+      const osc1 = state.audio.createOscillator();
+      const gain1 = state.audio.createGain();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(140, now);
+      osc1.frequency.exponentialRampToValueAtTime(40, now + 0.22);
+      gain1.gain.setValueAtTime(0.11, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+      osc1.connect(gain1); gain1.connect(state.audio.destination);
+      osc1.start(now); osc1.stop(now + 0.3);
+
+      // Трещащая верхушка
+      const osc2 = state.audio.createOscillator();
+      const gain2 = state.audio.createGain();
+      osc2.type = "square";
+      osc2.frequency.setValueAtTime(240, now);
+      osc2.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+      gain2.gain.setValueAtTime(0.07, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc2.connect(gain2); gain2.connect(state.audio.destination);
+      osc2.start(now); osc2.stop(now + 0.17);
+
+      haptic([35, 25, 45]);
     }
 
     const telemetry = {
@@ -1586,15 +1776,56 @@
 
     // ==================== UI HELPERS ====================
     function updateHeartsDisplay() {
-      heartsSection.querySelectorAll(".heart").forEach((h, i) => h.classList.toggle("lost", i >= state.playerHearts));
+      const hearts = heartsSection.querySelectorAll(".heart");
+      hearts.forEach((h, i) => {
+        h.classList.toggle("lost", i >= state.playerHearts);
+        h.classList.toggle("last-heart", state.playerHearts === 1 && i === 0);
+      });
     }
+
     function updateEnemyHPDisplay() {
       enemyHPFill.style.width = (state.enemyHP / state.enemyMaxHP * 100) + "%";
     }
-    function updateCombo() { comboValue.textContent = "×" + state.combo; }
 
-    function showNotification(text, color) {
-      notificationEl.textContent = text; notificationEl.style.color = color;
+    function updateCombo() {
+      comboValue.textContent = "×" + state.combo;
+
+      const comboEl = document.getElementById("combo");
+      if (state.combo > state.prevCombo || state.combo === 1) {
+        const intensity = Math.min(state.combo / 10, 1);
+        const scale = 1.15 + intensity * 0.25;
+        const rotate = -2 - intensity * 3;
+
+        comboEl.style.setProperty('--pulse-scale', scale);
+        comboEl.style.setProperty('--pulse-mid-scale', scale * 0.95);
+        comboEl.style.setProperty('--pulse-mid-scale-2', scale * 0.9);
+        comboEl.style.setProperty('--pulse-rotate', `${rotate}deg`);
+        comboEl.style.setProperty('--pulse-rotate-mid', `${-rotate * 0.6}deg`);
+        comboEl.style.setProperty('--pulse-rotate-2', `${rotate * 0.3}deg`);
+        comboEl.style.setProperty('--pulse-value-scale', 1.3 + intensity * 0.3);
+        comboEl.style.setProperty('--pulse-duration', `${0.35 + intensity * 0.15}s`);
+
+        comboEl.classList.remove('pulse');
+        void comboEl.offsetWidth;
+        comboEl.classList.add('pulse');
+      }
+
+      state.prevCombo = state.combo;
+    }
+
+    function showNotification(text, color, damage = 0) {
+      notificationEl.textContent = text;
+      notificationEl.style.color = color;
+
+      const baseSize = 24;
+      const sizeBoost = Math.min(damage / 3, 22);
+      notificationEl.style.setProperty('--notif-size', `${baseSize + sizeBoost}px`);
+
+      const offsetX = (Math.random() - 0.5) * 80;
+      const offsetY = (Math.random() - 0.5) * 40;
+      notificationEl.style.setProperty('--notif-x', `${offsetX}px`);
+      notificationEl.style.setProperty('--notif-y', `${offsetY}px`);
+
       notificationEl.classList.remove("show");
       void notificationEl.offsetWidth;
       notificationEl.classList.add("show");
@@ -1701,21 +1932,29 @@
       }
 
       let critical = null;
-      for (let i = 0; i < 500 && !critical; i++) {
-        const width = sliderConfig.critical_zone_width;
-        const left = sliderConfig.critical_min_left + rng() * (sliderConfig.critical_max_left_bound - width);
-        const candidate = { left, right: left + width, width, hit: false, required: false, critical: true };
-        if (zones.every(z => candidate.right + sliderConfig.critical_gap < z.left || candidate.left - sliderConfig.critical_gap > z.right)) {
-          critical = candidate;
+      if (rng() < (sliderConfig.critical_zone_chance || 0.35)) {
+        for (let i = 0; i < 500 && !critical; i++) {
+          const width = sliderConfig.critical_zone_width;
+          const left = sliderConfig.critical_min_left + rng() * (sliderConfig.critical_max_left_bound - width);
+          const candidate = { left, right: left + width, width, hit: false, required: false, critical: true };
+          if (zones.every(z => candidate.right + sliderConfig.critical_gap < z.left || candidate.left - sliderConfig.critical_gap > z.right)) {
+            critical = candidate;
+          }
         }
+        if (critical) zones.push(critical);
       }
-      if (critical) zones.push(critical);
+
       zones.sort((a, b) => a.left - b.left);
       return zones;
     }
 
     function renderSliderZones() {
-      sliderTrack.querySelectorAll(".slider-zone").forEach(el => el.remove());
+      const oldZones = sliderTrack.querySelectorAll(".slider-zone");
+      for (let i = 0; i < oldZones.length; i++) {
+        oldZones[i].remove();
+      }
+
+      const fragment = document.createDocumentFragment();
       state.slider.zones.forEach((z, i) => {
         const el = document.createElement("div");
         el.className = "slider-zone" + (z.critical ? " critical" : "");
@@ -1727,9 +1966,10 @@
           green.className = "zone-green";
           el.appendChild(green);
         }
-        sliderTrack.appendChild(el);
+        fragment.appendChild(el);
         z.el = el;
       });
+      sliderTrack.appendChild(fragment);
     }
 
     function startSliderRound() {
@@ -1754,13 +1994,19 @@
       setSliderPosition(0);
       const requiredCount = state.slider.zones.filter(z => z.required).length;
       sliderStatus.textContent = `ПОПАДИ ${requiredCount} • РЫЖИЕ = КРИТ!`;
+
+      sliderTimerFill.style.width = "100%";
+      sliderTimerFill.classList.remove("warn");
+
       runSliderRound();
     }
 
     function runSliderRound() {
       const roundStartPerf = state.slider.roundStartPerf;
       const roundStartUnix = state.slider.roundStartUnix;
-      const total = sliderDifficulty().time;
+
+      const diff = sliderDifficulty();
+      const total = diff.time;
       const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
 
       function frame(now) {
@@ -1787,10 +2033,10 @@
           sliderStatus.textContent = "ОПОЗДАЛ";
           gameLog("damage", { reason: "timeout" });
           state.combo = 0; updateCombo();
-          showNotification("ОПОЗДАЛ!", "#ff3344");
+          showNotification("ОПОЗДАЛ!", "#ff3344", 0);
           damagePlayer();
           hitSound(false);
-          if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
+          if (!state.isGameOver && !state.isVictory) requestAnimationFrame(startSliderRound);
           return;
         }
         state.slider.rafId = requestAnimationFrame(frame);
@@ -1827,11 +2073,11 @@
       if (zoneIndex < 0) {
         state.slider.active = false;
         state.combo = 0; updateCombo();
-        showNotification("ПРОМАХ!", "#ff3344");
+        showNotification("ПРОМАХ!", "#ff3344", 0);
         gameLog("damage", { reason: "miss" });
         damagePlayer();
-        hitSound(false);
-        if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
+        hitSound(false, 0);
+        if (!state.isGameOver && !state.isVictory) requestAnimationFrame(startSliderRound);
         return;
       }
 
@@ -1845,10 +2091,10 @@
         state.crit_damage++;
         updateCombo();
         damageEnemy(sliderConfig.damageCritical);
-        showNotification(`-${sliderConfig.damageCritical} КРИТ!`, "#ff7a00");
+        showNotification(`-${sliderConfig.damageCritical} КРИТ!`, "#ff7a00", sliderConfig.damageCritical);
         flashScreen();
         sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
-        tone(980, .11, "sawtooth", .05);
+        hitSound(true, sliderConfig.damageCritical);
         setTimeout(() => tone(1480, .12, "triangle", .04), 35);
         haptic([18, 35, 18]);
 
@@ -1869,7 +2115,7 @@
           state.slider.active = false;
           if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
           state.slider.rafId = null;
-          if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
+          if (!state.isGameOver && !state.isVictory) requestAnimationFrame(startSliderRound);
         } else {
           if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
           state.slider.rafId = null;
@@ -1891,16 +2137,16 @@
       state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
       updateCombo();
       damageEnemy(amount);
-      showNotification(`-${amount}`, inGreen ? "#63b85b" : "#e5c448");
+      showNotification(`-${amount}`, inGreen ? "#63b85b" : "#e5c448", amount);
       sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
-      hitSound(inGreen);
+      hitSound(false, amount);
 
       const requiredLeft = state.slider.zones.filter(zz => zz.required && !zz.hit).length;
       if (requiredLeft === 0) {
         state.slider.active = false;
         if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
         state.slider.rafId = null;
-        if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
+        if (!state.isGameOver && !state.isVictory) requestAnimationFrame(startSliderRound);
       } else {
         sliderStatus.textContent = `Осталось: ${requiredLeft}`;
       }
@@ -1917,13 +2163,14 @@
       const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`);
       if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400); }
       updateHeartsDisplay(); shakeScreen();
+      hurtSound();
       if (state.playerHearts <= 0) gameOver();
     }
 
     async function victory() {
-      state.isVictory = true; state.slider.active = false;
+      state.isVictory = true;
+      state.slider.active = false;
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
-      await finishBattle("victory");
 
       const coinsList = document.getElementById("reward-coins-list");
       const itemsList = document.getElementById("reward-items-list");
@@ -1952,7 +2199,9 @@
         }
       }
 
-      setTimeout(() => victoryOverlay.classList.add("show"), 450);
+      victoryOverlay.classList.add("show");
+
+      finishBattle("victory").catch(err => console.error("[battle] finish failed", err));
     }
 
     async function gameOver() {
@@ -1960,7 +2209,7 @@
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
       await finishBattle("death");
       gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`;
-      setTimeout(() => gameOverOverlay.classList.add("show"), 450);
+      gameOverOverlay.classList.add("show");
     }
 
     async function startNewBattle(sourceBtn = null) {
@@ -1970,8 +2219,10 @@
         document.getElementById("no-battle").classList.remove("show");
         document.getElementById("victory").classList.remove("show");
         document.getElementById("game-over").classList.remove("show");
+        battleStartOverlay.classList.remove("show");
 
         const loadingScreen = document.getElementById("battle-loading-screen");
+        loadingScreen.classList.remove("hidden");
         loadingScreen.classList.add("show");
         loaderState.current = 0;
         loaderState.target = 0;
@@ -1983,11 +2234,9 @@
         setLoadingProgress(40);
 
         battle = payload.battle;
-
         if (battle && "data" in battle) {
           tg_data = parseBattleData(battle.data);
         }
-
         tg_data.user = payload.user;
         setPlayerInfo();
 
@@ -2023,16 +2272,19 @@
         document.getElementById("game").classList.remove("battle-awaiting");
         document.getElementById("game").classList.add("battle-ready");
 
+        setLoadingProgress(100);
+
+        await new Promise(r => setTimeout(r, 300));
+
+        startGame();
+
         setTimeout(() => {
           loadingScreen.classList.remove("show");
-        }, 500);
-
-        setLoadingProgress(100);
-        startGame();
+        }, 200);
 
       } catch (error) {
         console.error("[battle] start new battle failed:", error);
-        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
+        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344", 0);
 
         const loadingScreen = document.getElementById("battle-loading-screen");
         loadingScreen.classList.remove("show");
