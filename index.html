@@ -6,6 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ОХОТА</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Handjet:wght,ELSH@100..900,2&family=Press+Start+2P&display=swap"
+    rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -25,11 +29,106 @@
       overscroll-behavior: none;
       background: #10251d;
       color: #f3e7bd;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Press Start 2P", system-ui;
       touch-action: none;
       user-select: none;
       position: fixed;
       inset: 0;
+    }
+
+    .player-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #7e879f;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .player-header .ph-name {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #9eaf86;
+    }
+
+    .player-header .ph-name::before {
+      content: '▸';
+      color: #63b85b;
+      font-size: 8px;
+    }
+
+    .player-header .ph-energy {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #d6c997;
+    }
+
+    .player-header .ph-energy::before {
+      content: '⚡';
+      font-size: 10px;
+    }
+
+    .pioneer-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 6px 8px 4px;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #31533f;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .pioneer-footer::before,
+    .pioneer-footer::after {
+      content: '☭';
+      font-size: 24px;
+      color: #31533f;
+    }
+
+    @media (max-width: 360px) {
+      .pioneer-footer {
+        font-size: 8px;
+        letter-spacing: 1.5px;
+        padding: 10px 12px 14px;
+        gap: 6px;
+      }
+
+      .pioneer-footer::before,
+      .pioneer-footer::after {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .player-header {
+        padding: 12px 16px;
+        font-size: 9px;
+      }
+
+      .pioneer-footer {
+        font-size: 8px;
+        letter-spacing: 1.5px;
+        padding: 10px 12px 14px;
+      }
     }
 
     #game {
@@ -131,7 +230,9 @@
       width: 50px;
       height: 50px;
       transition: transform .2s, opacity .2s;
-      filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, .4));
+      shape-rendering: crispEdges;
+      filter:
+        drop-shadow(3px 0 0 #f3e7bd) drop-shadow(-3px 0 0 #f3e7bd) drop-shadow(0 3px 0 #f3e7bd) drop-shadow(0 -3px 0 #f3e7bd);
     }
 
     .heart.lost {
@@ -430,9 +531,68 @@
       text-shadow: 4px 4px 0 #07120d;
     }
 
+    #no-battle h1 {
+      font-size: 28px;
+      letter-spacing: 5px;
+      text-align: center;
+      color: #e95732;
+      text-shadow: 3px 3px 0 #07120d;
+      margin-bottom: 16px;
+    }
+
+    .no-battle-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .no-battle-actions button {
+      min-width: 220px;
+    }
+
     #victory h1 {
       color: #63b85b;
       text-shadow: 4px 4px 0 #07120d;
+      font-size: 28px;
+      letter-spacing: 5px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .reward-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .reward-item {
+      color: #f3e7bd;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    .reward-item.main {
+      color: #e7d79e;
+      font-size: 14px;
+      font-weight: 900;
+      text-shadow: 2px 2px 0 #07120d;
+    }
+
+    .reward-item.bonus {
+      color: #9eaf86;
+      font-size: 10px;
+      padding-left: 8px;
+      border-left: 2px solid #31533f;
+    }
+
+    .reward-item.empty {
+      color: #7e879f;
+      font-size: 10px;
+      font-style: italic;
     }
 
     .result {
@@ -485,34 +645,258 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
       background: #10251d;
-      color: #fff;
+      color: #f3e7bd;
       text-align: center;
     }
 
-    .battle-loading-title {
-      font-size: 34px;
-      font-weight: 900;
-      letter-spacing: 4px;
+    .loading-header {
+      margin: 0 auto 30px auto;
+      text-align: justify;
     }
 
-    .battle-loading-text {
-      font-size: 13px;
-      opacity: .7;
-      letter-spacing: 2px;
+    .battle-loading-title {
+      display: block;
+      width: 100%;
+      font-size: 36px;
+      line-height: 1;
+      font-weight: 900;
+      text-transform: uppercase;
+      color: #f3e7bd;
+      text-shadow: 4px 4px 0 #07120d;
+      text-align: justify;
+      text-align-last: justify;
+    }
+
+    .battle-loading-subtitle {
+      display: block;
+      width: 100%;
+      margin-top: 4px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 700;
+      text-transform: lowercase;
+      color: #9eaf86;
+      text-shadow: 2px 2px 0 #07120d;
+      text-align-last: center;
+      letter-spacing: 13.7px;
+    }
+
+    .battle-loading-progress {
+      position: relative;
+      width: min(78vw, 520px);
+      height: 56px;
+      background: #17221c;
+      border: 3px solid #f3e7bd;
+      box-shadow: 5px 5px 0 #07120d;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+
+    .battle-loading-progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 0%;
+      background: #e7d79e;
+    }
+
+    .battle-loading-progress-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      pointer-events: none;
+      background: linear-gradient(90deg,
+          #10251d 0%,
+          #10251d var(--progress, 0%),
+          #e7d79e var(--progress, 0%),
+          #e7d79e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+    }
+
+    @media (max-width: 360px) {
+      .loading-header {
+        width: 85vw;
+      }
+
+      .battle-loading-title {
+        font-size: 34px;
+      }
+
+      .battle-loading-subtitle {
+        font-size: 14px;
+      }
+
+      .battle-loading-progress {
+        height: 50px;
+      }
+
+      .battle-loading-progress-text {
+        font-size: 18px;
+        letter-spacing: 4px;
+      }
     }
 
     #battle-loading-screen.hidden {
       display: none;
     }
 
-    #retry-btn {
+    @media (max-width: 360px) {
+      .loading-header {
+        width: 82vw;
+      }
+
+      .battle-loading-title {
+        font-size: 30px;
+      }
+
+      .battle-loading-subtitle {
+        font-size: 12px;
+      }
+
+      .battle-loading-progress {
+        width: 82vw;
+        height: 44px;
+      }
+
+      .battle-loading-progress-text {
+        font-size: 14px;
+        letter-spacing: 3px;
+      }
+    }
+
+    .monster-encounter {
+      position: relative;
+      color: #f3e7bd;
+      font-size: 11px;
+      letter-spacing: 1px;
+      line-height: 1.6;
+      text-align: left;
+      margin: 10px auto 0 auto;
+      padding: 28px 20px 20px 24px;
+      border: 2px solid #31533f;
+      background: #0d1f18;
+      box-shadow: 6px 6px 0 #07120d;
+      max-width: min(85vw, 360px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      clip-path: polygon(34px 0, 100% 0,
+          100% 100%, 0 100%,
+          0 34px);
+    }
+
+    .dossier-pin {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 10px;
+      margin-top: 12px;
+      background: #a83828;
+      box-shadow:
+        2px 2px 0 #07120d,
+        inset -2px -2px 0 #7a2818,
+        inset 2px 2px 0 #c84838;
+      z-index: 1;
+    }
+
+    .dossier-wrapper {
+      position: relative;
+      max-width: min(85vw, 360px);
+      margin: 10px auto 0 auto;
+    }
+
+    .encounter-content {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .dossier-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dossier-label {
+      color: #e95732;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .m-name {
+      color: #f3e7bd;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 #07120d;
+    }
+
+    .m-desc {
+      color: #9eaf86;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+      text-transform: none;
+    }
+
+    .encounter-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px dashed #31533f;
+    }
+
+    .encounter-actions #start-battle-btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 360px) {
+      .monster-encounter {
+        padding: 24px 16px 16px 20px;
+      }
+
+      .m-name {
+        font-size: 14px;
+      }
+
+      .m-desc {
+        font-size: 10px;
+      }
+
+      .encounter-actions #start-battle-btn {
+        padding: 10px 20px;
+        font-size: 11px;
+      }
+    }
+
+    #retry-btn,
+    #exit-btn,
+    #no-battle-exit-btn {
       background: #10251d;
       color: #e7d79e;
       border: 0;
       box-shadow: none;
       padding: 8px 34px;
+    }
+
+    #exit-btn {
+      margin-top: 8px;
     }
 
     /* =========================
@@ -535,47 +919,32 @@
         filter .12s steps(2, end);
     }
 
-    /* Hover — desktop */
     @media (hover: hover) and (pointer: fine) {
       .overlay button:not(:disabled):hover {
         background: #f3e7bd;
         color: #10251d;
         border-color: #fff5cf;
-
         transform: translate(-2px, -2px);
-
-        box-shadow:
-          7px 7px 0 #07120d,
-          0 0 0 2px rgba(99, 184, 91, .15);
-
+        box-shadow: 7px 7px 0 #07120d, 0 0 0 2px rgba(99, 184, 91, .15);
         filter: brightness(1.04);
       }
 
       #retry-btn:not(:disabled):hover {
         color: #fff5cf;
         background: #173429;
-
         transform: translate(-1px, -1px);
-
-        box-shadow:
-          4px 4px 0 #07120d;
+        box-shadow: 4px 4px 0 #07120d;
       }
     }
 
-    /* Tap / press */
     .overlay button:not(:disabled):active {
       transform: translate(3px, 3px);
-
-      box-shadow:
-        1px 1px 0 #07120d;
-
+      box-shadow: 1px 1px 0 #07120d;
       background: #d6c997;
       border-color: #e7d79e;
-
       filter: brightness(.94);
     }
 
-    /* Retry button — pressed */
     #retry-btn:not(:disabled):active {
       transform: translate(2px, 2px);
       box-shadow: none;
@@ -583,13 +952,11 @@
       color: #f3e7bd;
     }
 
-    /* Keyboard focus */
     .overlay button:focus-visible {
       outline: 2px solid #63b85b;
       outline-offset: 4px;
     }
 
-    /* Disabled state */
     .overlay button:disabled {
       opacity: .45;
       cursor: default;
@@ -624,13 +991,34 @@
 
 <body>
   <div id="battle-loading-screen" class="overlay show">
-    <div class="battle-loading-title">ОХОТА</div>
-    <div class="battle-loading-text">ЗАГРУЗКА БИТВЫ...</div>
+    <div class="loading-header">
+      <div class="battle-loading-title">ОХОТА</div>
+      <div class="battle-loading-subtitle">крепкая</div>
+    </div>
+
+    <div class="battle-loading-progress">
+      <div class="battle-loading-progress-fill"></div>
+      <div class="battle-loading-progress-text">ЗАГРУЗКА</div>
+    </div>
+
+    <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
   </div>
 
   <div id="no-battle" class="overlay">
+    <div class="player-header">
+      <div class="ph-name" id="nobattle-player-name">—</div>
+      <div class="ph-energy" id="nobattle-player-energy">—</div>
+    </div>
+
     <h1>НЕТ БИТВЫ</h1>
-    <div class="result">СЕЙЧАС НЕТ АКТИВНОЙ БИТВЫ<br>ЗАКРОЙТЕ ИГРУ И ПОПРОБУЙТЕ ПОЗЖЕ</div>
+    <div class="result">Активной битвы нет<br>Но ты можешь ее найти!</div>
+
+    <div class="no-battle-actions">
+      <button id="no-battle-reload-btn">В бой (-1⚡️)</button>
+      <button id="no-battle-exit-btn">Выйти</button>
+    </div>
+
+    <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
   </div>
 
   <div id="game" class="battle-awaiting">
@@ -650,7 +1038,7 @@
     <div id="input-zone">
       <img id="slider-monster" alt="" />
       <div id="slider-game">
-        <div id="slider-title">MOVE THE RUNNER • HIT EVERY ZONE</div>
+        <div id="slider-title"></div>
         <div id="slider-track">
           <div id="slider-knob"></div>
         </div>
@@ -659,17 +1047,17 @@
         </div>
         <div id="slider-status">НАЖМИТЕ ЧТОБЫ АТАКОВАТЬ</div>
         <div id="hearts-section">
-          <div class="heart" data-heart="0"><svg viewBox="0 0 24 24" fill="#ff4466">
+          <div class="heart" data-heart="0"><svg viewBox="0 0 10 8" fill="#e95732">
               <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                d="M1,0h2v1h-2Z M7,0h2v1h-2Z M0,1h4v1h-4Z M6,1h4v1h-4Z M0,2h10v1h-10Z M0,3h10v1h-10Z M1,4h8v1h-8Z M2,5h6v1h-6Z M3,6h4v1h-4Z M4,7h2v1h-2Z" />
             </svg></div>
-          <div class="heart" data-heart="1"><svg viewBox="0 0 24 24" fill="#ff4466">
+          <div class="heart" data-heart="1"><svg viewBox="0 0 10 8" fill="#e95732">
               <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                d="M1,0h2v1h-2Z M7,0h2v1h-2Z M0,1h4v1h-4Z M6,1h4v1h-4Z M0,2h10v1h-10Z M0,3h10v1h-10Z M1,4h8v1h-8Z M2,5h6v1h-6Z M3,6h4v1h-4Z M4,7h2v1h-2Z" />
             </svg></div>
-          <div class="heart" data-heart="2"><svg viewBox="0 0 24 24" fill="#ff4466">
+          <div class="heart" data-heart="2"><svg viewBox="0 0 10 8" fill="#e95732">
               <path
-                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                d="M1,0h2v1h-2Z M7,0h2v1h-2Z M0,1h4v1h-4Z M6,1h4v1h-4Z M0,2h10v1h-10Z M0,3h10v1h-10Z M1,4h8v1h-8Z M2,5h6v1h-6Z M3,6h4v1h-4Z M4,7h2v1h-2Z" />
             </svg></div>
         </div>
       </div>
@@ -679,22 +1067,85 @@
     <div id="flash-overlay"></div>
 
     <div id="battle-start" class="overlay show">
-      <h1>ОХОТА</h1>
-      <div class="result">ГОТОВ?<br>НАЖМИ ЧТОБЫ НАЧАТЬ</div>
-      <button id="start-battle-btn">В БОЙ!</button>
+      <div class="player-header">
+        <div class="ph-name" id="start-player-name">—</div>
+        <div class="ph-energy" id="start-player-energy">—</div>
+      </div>
+
+      <div class="loading-header">
+        <div class="battle-loading-title">ОХОТА</div>
+        <div class="battle-loading-subtitle">крепкая</div>
+      </div>
+
+      <div class="dossier-wrapper">
+        <div class="dossier-pin"></div>
+        <div id="monster-encounter-info" class="monster-encounter">
+          <div class="encounter-content">
+            <div class="dossier-row">
+              <span class="dossier-label">[ИМЯ]:</span>
+              <span class="m-name" id="dossier-name">ОЖИДАНИЕ ДАННЫХ...</span>
+            </div>
+            <div class="dossier-row">
+              <span class="dossier-label">[ОПИСАНИЕ]:</span>
+              <span class="m-desc" id="dossier-desc">Разведка уточняет параметры угрозы.</span>
+            </div>
+          </div>
+
+          <div class="encounter-actions">
+            <button id="start-battle-btn">НА ОХОТУ!</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
     </div>
+
     <div id="game-over" class="overlay">
+      <div class="player-header">
+        <div class="ph-name" id="gameover-player-name">—</div>
+        <div class="ph-energy" id="gameover-player-energy">—</div>
+      </div>
+
       <h1>ПОГИБ</h1>
       <div class="result" id="gameover-result"></div>
       <div class="game-over-actions">
         <button id="end-btn">Выйти</button>
         <button id="retry-btn">Заново (-1⚡️)</button>
       </div>
+
+      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
     </div>
+
     <div id="victory" class="overlay">
+      <div class="player-header">
+        <div class="ph-name" id="victory-player-name">—</div>
+        <div class="ph-energy" id="victory-player-energy">—</div>
+      </div>
+
       <h1>ПОБЕДА!</h1>
-      <div class="result" id="victory-result"></div>
-      <button id="next-btn">Забрать добычу</button>
+
+      <div class="dossier-wrapper">
+        <div class="dossier-pin"></div>
+        <div class="monster-encounter reward-dossier">
+          <div class="encounter-content">
+            <div class="dossier-row">
+              <span class="dossier-label">[МОНЕТЫ]:</span>
+              <div id="reward-coins-list" class="reward-list"></div>
+            </div>
+            <div class="dossier-row">
+              <span class="dossier-label">[ПРЕДМЕТЫ]:</span>
+              <div id="reward-items-list" class="reward-list"></div>
+            </div>
+          </div>
+
+          <div class="encounter-actions" style="flex-direction: column; align-items: stretch;">
+            <button id="next-btn">Следующий бой (-1⚡️)</button>
+            <button id="exit-btn">Выйти</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
     </div>
   </div>
 
@@ -705,6 +1156,44 @@
     const BATTLE_API_URL = (window.BATTLE_API_URL || "https://jesterapi.ddns.net").replace(/\/$/, "");
     const initData = tg.initData || "";
     let battle = null, tg_data = {}, apiReady = false, battleSeed = 0, logFlushInFlight = false;
+
+    const loaderState = {
+      current: 0,
+      target: 0,
+      raf: null,
+      startTime: 0
+    };
+
+    function setPlayerInfo() {
+      const user_name = tg_data.user.user_name || "";
+      const user_custom_title = tg_data.user.user_custom_title || "ПИОНЕР";
+      const energy = tg_data.user.energy ?? "—";
+
+      const nameIds = [
+        "loading-player-name",
+        "nobattle-player-name",
+        "start-player-name",
+        "gameover-player-name",
+        "victory-player-name"
+      ];
+      const energyIds = [
+        "loading-player-energy",
+        "nobattle-player-energy",
+        "start-player-energy",
+        "gameover-player-energy",
+        "victory-player-energy"
+      ];
+
+      nameIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = user_name;
+      });
+
+      energyIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = energy;
+      });
+    }
 
     function parseBattleData(data) {
       if (data == null) return {};
@@ -723,45 +1212,134 @@
       return payload;
     }
 
-    function showLoadedBattleScreen() {
-      document.getElementById("game").classList.remove("battle-awaiting");
-      document.getElementById("game").classList.add("battle-ready");
-      document.getElementById("battle-loading-screen").classList.add("hidden");
+    function setLoadingProgress(value) {
+      loaderState.target = Math.max(0, Math.min(100, value));
+      if (!loaderState.startTime) loaderState.startTime = performance.now();
+      if (!loaderState.raf) {
+        loaderState.raf = requestAnimationFrame(animateLoader);
+      }
     }
-    function showNoBattleScreen(message) {
+
+    function animateLoader(timestamp) {
+      const elapsed = timestamp - loaderState.startTime;
+      const minDuration = 1200;
+
+      let effectiveTarget = loaderState.target;
+      if (effectiveTarget === 100 && elapsed < minDuration) {
+        effectiveTarget = (elapsed / minDuration) * 100;
+      }
+
+      const diff = effectiveTarget - loaderState.current;
+      if (diff > 0.1) {
+        loaderState.current += diff * 0.15;
+      } else {
+        loaderState.current = effectiveTarget;
+      }
+
+      updateLoaderVisuals(loaderState.current);
+
+      if (loaderState.current >= 99.9 && loaderState.target === 100 && elapsed >= minDuration) {
+        loaderState.current = 100;
+        updateLoaderVisuals(100);
+        loaderState.raf = null;
+        return;
+      }
+
+      loaderState.raf = requestAnimationFrame(animateLoader);
+    }
+
+    function updateLoaderVisuals(value) {
+      const p = Math.max(0, Math.min(100, value));
+      const fill = document.querySelector(".battle-loading-progress-fill");
+      if (fill) fill.style.width = `${p}%`;
+
+      const text = document.querySelector(".battle-loading-progress-text");
+      if (text) {
+        text.style.background = `linear-gradient(90deg, #10251d 0%, #10251d ${p}%, #e7d79e ${p}%, #e7d79e 100%)`;
+        text.style.webkitBackgroundClip = "text";
+        text.style.backgroundClip = "text";
+        text.style.color = "transparent";
+        text.style.textShadow = "none";
+      }
+    }
+
+    function showNoBattleScreen() {
       document.getElementById("game").classList.add("hidden");
       document.getElementById("battle-start").classList.remove("show");
       document.getElementById("no-battle").classList.add("show");
-      if (message) document.querySelector("#no-battle .result").innerHTML = message;
       document.getElementById("battle-loading-screen").classList.add("hidden");
+    }
+
+    function showLoadedBattleScreen() {
+      setTimeout(() => {
+        document.getElementById("game").classList.remove("battle-awaiting");
+        document.getElementById("game").classList.add("battle-ready");
+        document.getElementById("battle-loading-screen").classList.add("hidden");
+      }, 1000);
     }
 
     async function loadBattle() {
       try {
+        setLoadingProgress(8);
+        await new Promise(r => setTimeout(r, 50));
+
         const payload = await apiRequest("/battle");
+        setLoadingProgress(42);
+
         battle = payload.battle;
-        if (!battle) { showNoBattleScreen(); return false; }
+        tg_data.user = payload.user;
+        setPlayerInfo()
+
+        if (!battle) {
+          setLoadingProgress(100);
+          showNoBattleScreen();
+          return false;
+        } else {
+          tg_data = parseBattleData(battle.data);
+        }
+
+        setLoadingProgress(58);
 
         if (battle.slider_config) {
           sliderConfig = { ...sliderConfig, ...battle.slider_config };
         }
 
+        setLoadingProgress(68);
         showLoadedBattleScreen();
-        tg_data = parseBattleData(battle.data);
-        if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) throw new Error("Invalid battle data");
+
+        setLoadingProgress(78);
+
+        if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) {
+          throw new Error("Invalid battle data");
+        }
+
         tg_data.money_drop = tg_data.money_drop ?? 0;
         tg_data.items_drop = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
+
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
+
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
-        document.getElementById("slider-monster").onerror = function () { this.style.display = 'none'; };
-        if (tg_data.monster_id != null) document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+
+        document.getElementById("slider-monster").onerror = function () {
+          this.style.display = "none";
+        };
+
+        if (tg_data.monster_id != null) {
+          document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+        }
+
+        setLoadingProgress(90);
         battleSeed = Number(payload.battle.seed || 0) >>> 0;
         apiReady = true;
+        setLoadingProgress(100);
+
         return true;
+
       } catch (error) {
         console.error("[battle] load failed", error);
-        showNoBattleScreen("НЕ УДАЛОСЬ ЗАГРУЗИТЬ БИТВУ<br>ПОПРОБУЙТЕ ОТКРЫТЬ ИГРУ ЕЩЁ РАЗ");
+        setLoadingProgress(100);
+        showNoBattleScreen();
         return false;
       }
     }
@@ -781,7 +1359,6 @@
       finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0,
     };
 
-    // ЕДИНЫЙ ИСТОЧНИК КОНФИГУРАЦИИ (перезаписывается данными с бэкенда)
     let sliderConfig = {
       round_time_base_ms: 2600,
       round_time_decay_per_diff: 550,
@@ -801,7 +1378,6 @@
       base_zones: 2,
       difficulty_zone_multiplier: 8,
       difficulty_zone_divisor: 3,
-      // Параметры урона и зон, добавленные для полной централизации
       damageYellow: 7,
       damageGreen: 24,
       damageCritical: 45,
@@ -831,6 +1407,7 @@
       if (state.audio) return;
       try { state.audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
     }
+
     function tone(freq, dur = .06, type = "sine", gain = .035) {
       if (!state.audio) return;
       const o = state.audio.createOscillator(), g = state.audio.createGain(), now = state.audio.currentTime;
@@ -839,7 +1416,11 @@
       o.connect(g); g.connect(state.audio.destination);
       o.start(now); o.stop(now + dur + .02);
     }
-    function haptic(ms = 12) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+    function haptic(ms = 12) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
     function hitSound(perfect = false) {
       tone(perfect ? 760 : 480, perfect ? .12 : .07, perfect ? "triangle" : "square", perfect ? .055 : .03);
       if (perfect) { setTimeout(() => tone(1120, .1, "triangle", .035), 35); haptic([12, 28, 12]); }
@@ -847,18 +1428,8 @@
     }
 
     const telemetry = {
-      queue: [],
-      seq: 0,
-      flushTimer: null,
-      lastMoveAt: 0,
-      lastMoveX: null,
-      lastMoveY: null,
-      inInputZone: false,
-      active: false,
-      stopped: false,
-      listenersBound: false,
-      lastInput: null,
-      flushInFlight: null,
+      queue: [], seq: 0, flushTimer: null, lastMoveAt: 0, lastMoveX: null, lastMoveY: null,
+      inInputZone: false, active: false, stopped: false, listenersBound: false, lastInput: null, flushInFlight: null,
     };
 
     function telemetryId() {
@@ -870,17 +1441,8 @@
       if (!telemetry.active || telemetry.stopped) return;
       const now = Date.now();
       const item = {
-        id: telemetryId(),
-        seq: ++telemetry.seq,
-        kind,
-        client_ts: now,
-        x: null,
-        y: null,
-        pointer_type: null,
-        pressure: null,
-        buttons: null,
-        key: null,
-        extra,
+        id: telemetryId(), seq: ++telemetry.seq, kind, client_ts: now, x: null, y: null,
+        pointer_type: null, pressure: null, buttons: null, key: null, extra,
       };
 
       if (e) {
@@ -889,8 +1451,7 @@
         item.buttons = typeof e.buttons === "number" ? e.buttons : null;
         item.key = e.code || null;
         item.extra = { ...extra, trusted: e.isTrusted !== false };
-        const rect = e.currentTarget?.getBoundingClientRect?.() ||
-          document.getElementById("input-zone")?.getBoundingClientRect?.();
+        const rect = e.currentTarget?.getBoundingClientRect?.() || document.getElementById("input-zone")?.getBoundingClientRect?.();
         if (rect && typeof e.clientX === "number") {
           item.x = Math.max(0, Math.min(1, (e.clientX - rect.left) / Math.max(1, rect.width)));
           item.y = Math.max(0, Math.min(1, (e.clientY - rect.top) / Math.max(1, rect.height)));
@@ -898,13 +1459,7 @@
       }
       telemetry.queue.push(item);
       if (kind === "pointerdown" || kind === "keydown") {
-        telemetry.lastInput = {
-          seq: item.seq,
-          kind,
-          ts: now,
-          trusted: e ? e.isTrusted !== false : null,
-          pointer_type: item.pointer_type,
-        };
+        telemetry.lastInput = { seq: item.seq, kind, ts: now, trusted: e ? e.isTrusted !== false : null, pointer_type: item.pointer_type };
       }
       if (telemetry.queue.length >= 20) void flushTelemetry(false);
       return item.seq;
@@ -934,10 +1489,7 @@
       if (telemetry.stopped) return;
       telemetry.stopped = true;
       telemetry.active = false;
-      if (telemetry.flushTimer) {
-        clearInterval(telemetry.flushTimer);
-        telemetry.flushTimer = null;
-      }
+      if (telemetry.flushTimer) { clearInterval(telemetry.flushTimer); telemetry.flushTimer = null; }
       await flushTelemetry(true);
       telemetry.queue.length = 0;
     }
@@ -951,16 +1503,13 @@
         if (!telemetry.active || telemetry.stopped) return;
         void flushTelemetry(false);
       }, 300);
+
       if (!telemetry.listenersBound) {
         telemetry.listenersBound = true;
-        document.addEventListener("visibilitychange", () =>
-          telemetryRecord(document.hidden ? "visibility_hidden" : "visibility_visible")
-        );
+        document.addEventListener("visibilitychange", () => telemetryRecord(document.hidden ? "visibility_hidden" : "visibility_visible"));
         window.addEventListener("focus", () => telemetryRecord("focus"));
         window.addEventListener("blur", () => telemetryRecord("blur"));
-        window.addEventListener("resize", () => telemetryRecord("resize", null, {
-          w: window.innerWidth, h: window.innerHeight,
-        }));
+        window.addEventListener("resize", () => telemetryRecord("resize", null, { w: window.innerWidth, h: window.innerHeight }));
 
         const zone = document.getElementById("input-zone");
         if (zone) {
@@ -990,6 +1539,7 @@
       state.log.push(entry);
       if (state.log.length - state.logSent >= 10 || action === "start") void flushLogs(false);
     }
+
     async function flushLogs(force = false) {
       if (logFlushInFlight || !apiReady || !battle) return;
       logFlushInFlight = true;
@@ -1042,16 +1592,19 @@
       enemyHPFill.style.width = (state.enemyHP / state.enemyMaxHP * 100) + "%";
     }
     function updateCombo() { comboValue.textContent = "×" + state.combo; }
+
     function showNotification(text, color) {
       notificationEl.textContent = text; notificationEl.style.color = color;
       notificationEl.classList.remove("show");
       void notificationEl.offsetWidth;
       notificationEl.classList.add("show");
     }
+
     function flashScreen() {
       flashOverlay.classList.remove("flash"); void flashOverlay.offsetWidth;
       flashOverlay.classList.add("flash");
     }
+
     function shakeScreen() {
       gameEl.classList.remove("shake"); void gameEl.offsetWidth;
       gameEl.classList.add("shake");
@@ -1063,6 +1616,18 @@
       state.finished = false; state.finishingPromise = null;
       state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0;
       logFlushInFlight = false;
+
+      if (tg_data) {
+        const mName = tg_data.monster_name || "[ДАННЫЕ УДАЛЕНЫ]";
+        const mDesc = tg_data.monster_desc || "[ДАННЫЕ УДАЛЕНЫ]";
+
+        const nameEl = document.getElementById("dossier-name");
+        const descEl = document.getElementById("dossier-desc");
+
+        if (nameEl) nameEl.textContent = mName;
+        if (descEl) descEl.innerHTML = mDesc;
+      }
+
       state.playerHearts = 3;
       state.enemyHP = state.enemyMaxHP;
       state.combo = 0; state.bestCombo = 0;
@@ -1171,15 +1736,11 @@
       if (state.isGameOver || state.isVictory) return;
       state.roundIndex++;
       state.slider.zones = makeSliderZones();
-
       const roundStartUnix = Date.now();
 
       gameLog("round", {
         round: state.roundIndex,
-        zones: state.slider.zones.map(z => ({
-          left: z.left, right: z.right,
-          critical: z.critical, required: z.required
-        })),
+        zones: state.slider.zones.map(z => ({ left: z.left, right: z.right, critical: z.critical, required: z.required })),
         difficulty: state.difficulty,
         round_start: roundStartUnix,
       });
@@ -1192,7 +1753,7 @@
       renderSliderZones();
       setSliderPosition(0);
       const requiredCount = state.slider.zones.filter(z => z.required).length;
-      sliderStatus.textContent = `HIT ${requiredCount} ZONES • ORANGE = CRIT`;
+      sliderStatus.textContent = `ПОПАДИ ${requiredCount} • РЫЖИЕ = КРИТ!`;
       runSliderRound();
     }
 
@@ -1203,8 +1764,7 @@
       const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
 
       function frame(now) {
-        if (!state.slider.active || state.isGameOver || state.isVictory ||
-          roundStartPerf !== state.slider.roundStartPerf) return;
+        if (!state.slider.active || state.isGameOver || state.isVictory || roundStartPerf !== state.slider.roundStartPerf) return;
 
         const elapsedPerf = now - roundStartPerf;
         const left = Math.max(0, total - elapsedPerf);
@@ -1224,10 +1784,10 @@
           state.slider.active = false;
           state.slider.rafId = null;
           sliderTimerFill.style.width = "0%";
-          sliderStatus.textContent = "TIME OUT";
+          sliderStatus.textContent = "ОПОЗДАЛ";
           gameLog("damage", { reason: "timeout" });
           state.combo = 0; updateCombo();
-          showNotification("TIME OUT!", "#ff3344");
+          showNotification("ОПОЗДАЛ!", "#ff3344");
           damagePlayer();
           hitSound(false);
           if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
@@ -1260,10 +1820,7 @@
       const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
 
       gameLog("tap", {
-        input_seq: inputSeq,
-        input_kind: inputKind,
-        input_age_ms: tapInputAge,
-        input_trusted: inputTrusted,
+        input_seq: inputSeq, input_kind: inputKind, input_age_ms: tapInputAge, input_trusted: inputTrusted,
         source: sourceEvent ? (sourceEvent.code === "Space" ? "keyboard" : "pointer") : "programmatic"
       });
 
@@ -1271,9 +1828,7 @@
         state.slider.active = false;
         state.combo = 0; updateCombo();
         showNotification("ПРОМАХ!", "#ff3344");
-
         gameLog("damage", { reason: "miss" });
-
         damagePlayer();
         hitSound(false);
         if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
@@ -1285,7 +1840,9 @@
       sliderTrack.querySelector(`[data-zone="${zoneIndex}"]`)?.classList.add("hit");
 
       if (z.critical) {
-        state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
+        state.combo++;
+        state.bestCombo = Math.max(state.bestCombo, state.combo);
+        state.crit_damage++;
         updateCombo();
         damageEnemy(sliderConfig.damageCritical);
         showNotification(`-${sliderConfig.damageCritical} КРИТ!`, "#ff7a00");
@@ -1301,11 +1858,7 @@
 
         gameLog("round", {
           round: state.roundIndex,
-          zones: state.slider.zones.map(z => ({
-            left: z.left, right: z.right,
-            critical: z.critical, required: z.required,
-            hit: z.hit
-          })),
+          zones: state.slider.zones.map(z => ({ left: z.left, right: z.right, critical: z.critical, required: z.required, hit: z.hit })),
           difficulty: state.difficulty,
           round_start: newRoundStartUnix,
           timer_reset: true,
@@ -1322,7 +1875,7 @@
           state.slider.rafId = null;
           sliderTimerFill.style.width = "100%";
           sliderTimerFill.classList.remove("warn");
-          sliderStatus.textContent = `TIMER RESET • ZONES LEFT: ${requiredLeft}`;
+          sliderStatus.textContent = `Осталось: ${requiredLeft}`;
           runSliderRound();
         }
         return;
@@ -1349,7 +1902,7 @@
         state.slider.rafId = null;
         if (!state.isGameOver && !state.isVictory) setTimeout(startSliderRound, 220);
       } else {
-        sliderStatus.textContent = `ZONES LEFT: ${requiredLeft}`;
+        sliderStatus.textContent = `Осталось: ${requiredLeft}`;
       }
     }
 
@@ -1358,6 +1911,7 @@
       updateEnemyHPDisplay();
       if (state.enemyHP <= 0) victory();
     }
+
     function damagePlayer() {
       state.playerHearts--;
       const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`);
@@ -1365,19 +1919,132 @@
       updateHeartsDisplay(); shakeScreen();
       if (state.playerHearts <= 0) gameOver();
     }
+
     async function victory() {
       state.isVictory = true; state.slider.active = false;
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
       await finishBattle("victory");
-      victoryResult.innerHTML = `<h2><b>+💰${tg_data.money_drop}</b></h2> ${tg_data.items_drop.join('<br>') + '<br>'}`;
+
+      const coinsList = document.getElementById("reward-coins-list");
+      const itemsList = document.getElementById("reward-items-list");
+
+      if (coinsList && tg_data) {
+        const mainMoney = Number(tg_data.money_drop) || 0;
+        const comboBonus = Math.trunc(state.bestCombo / 10);
+        const critBonus = state.crit_damage;
+
+        let coinsHTML = `<div class="reward-item main">+💰 ${mainMoney}</div>`;
+        if (comboBonus > 0) {
+          coinsHTML += `<div class="reward-item bonus">+💰 ${comboBonus} (комбо ×${state.bestCombo})</div>`;
+        }
+        if (critBonus > 0) {
+          coinsHTML += `<div class="reward-item bonus">+💰 ${critBonus} (критические удары)</div>`;
+        }
+        coinsList.innerHTML = coinsHTML;
+      }
+
+      if (itemsList && tg_data) {
+        const items = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
+        if (items.length > 0) {
+          itemsList.innerHTML = items.map(item => `<div class="reward-item">${item}</div>`).join('');
+        } else {
+          itemsList.innerHTML = `<div class="reward-item empty">добыча не найдена</div>`;
+        }
+      }
+
       setTimeout(() => victoryOverlay.classList.add("show"), 450);
     }
+
     async function gameOver() {
       state.isGameOver = true; state.slider.active = false;
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
       await finishBattle("death");
       gameoverResult.innerHTML = `ПОДРАНОК СБЕЖАЛ`;
       setTimeout(() => gameOverOverlay.classList.add("show"), 450);
+    }
+
+    async function startNewBattle(sourceBtn = null) {
+      if (sourceBtn) sourceBtn.disabled = true;
+
+      try {
+        document.getElementById("no-battle").classList.remove("show");
+        document.getElementById("victory").classList.remove("show");
+        document.getElementById("game-over").classList.remove("show");
+
+        const loadingScreen = document.getElementById("battle-loading-screen");
+        loadingScreen.classList.add("show");
+        loaderState.current = 0;
+        loaderState.target = 0;
+        setLoadingProgress(10);
+
+        const payload = await apiRequest("/battle/new", { method: "POST" });
+        if (!payload.battle) throw new Error("No battle returned from API");
+
+        setLoadingProgress(40);
+
+        battle = payload.battle;
+
+        if (battle && "data" in battle) {
+          tg_data = parseBattleData(battle.data);
+        }
+
+        tg_data.user = payload.user;
+        setPlayerInfo();
+
+        setLoadingProgress(60);
+
+        if (!Number.isFinite(Number(tg_data.monster_hp)) || Number(tg_data.monster_hp) <= 0) {
+          throw new Error("Invalid battle data: monster_hp");
+        }
+
+        tg_data.money_drop = tg_data.money_drop ?? 0;
+        tg_data.items_drop = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
+
+        state.enemyMaxHP = Number(tg_data.monster_hp);
+        state.enemyHP = state.enemyMaxHP;
+        battleSeed = Number(battle.seed || 0) >>> 0;
+        apiReady = true;
+
+        document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
+        document.getElementById("slider-monster").onerror = function () {
+          this.style.display = "none";
+        };
+        if (tg_data.monster_id != null) {
+          document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+        }
+
+        if (battle.slider_config) {
+          sliderConfig = { ...sliderConfig, ...battle.slider_config };
+        }
+
+        setLoadingProgress(85);
+
+        document.getElementById("game").classList.remove("hidden");
+        document.getElementById("game").classList.remove("battle-awaiting");
+        document.getElementById("game").classList.add("battle-ready");
+
+        setTimeout(() => {
+          loadingScreen.classList.remove("show");
+        }, 500);
+
+        setLoadingProgress(100);
+        startGame();
+
+      } catch (error) {
+        console.error("[battle] start new battle failed:", error);
+        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
+
+        const loadingScreen = document.getElementById("battle-loading-screen");
+        loadingScreen.classList.remove("show");
+
+        if (battle && !state.isVictory && !state.isGameOver) {
+          document.getElementById("victory").classList.add("show");
+        } else if (!battle) {
+          document.getElementById("no-battle").classList.add("show");
+        }
+      } finally {
+        if (sourceBtn) sourceBtn.disabled = false;
+      }
     }
 
     async function restartBattle() {
@@ -1390,7 +2057,11 @@
         });
         if (!payload.battle) throw new Error("Battle restart returned no battle");
         battle = payload.battle;
-        tg_data = parseBattleData(battle.data);
+        if (battle && "data" in battle) {
+          tg_data = parseBattleData(battle.data);
+        }
+        tg_data.user = payload.user;
+        setPlayerInfo();
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
         battleSeed = Number(battle.seed || 0) >>> 0;
@@ -1425,7 +2096,14 @@
       document.getElementById("start-battle-btn").addEventListener("click", beginBattle);
       document.getElementById("end-btn").addEventListener("click", () => tg.close());
       document.getElementById("retry-btn").addEventListener("click", () => void restartBattle());
-      document.getElementById("next-btn").addEventListener("click", () => tg.close());
+      document.getElementById("next-btn").addEventListener("click", function () {
+        void startNewBattle(this);
+      });
+      document.getElementById("exit-btn").addEventListener("click", () => tg.close());
+      document.getElementById("no-battle-exit-btn").addEventListener("click", () => tg.close());
+      document.getElementById("no-battle-reload-btn").addEventListener("click", function () {
+        void startNewBattle(this);
+      });
     }
 
     setupEventListeners();
