@@ -366,7 +366,7 @@
     #slider-monster {
       position: absolute;
       left: 50%;
-      top: 10%;
+      top: 5%;
       width: min(58vw, 440px);
       height: min(58vw, 440px);
       transform: translate(-50%, -50%);
@@ -667,6 +667,44 @@
       letter-spacing: 5px;
       margin-bottom: 24px;
       text-align: center;
+      transform-origin: center center;
+    }
+
+    #victory h1.celebrate {
+      animation: victoryCelebrate 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes victoryCelebrate {
+      0% {
+        transform: scale(0.3) rotate(-15deg);
+        opacity: 0;
+      }
+
+      25% {
+        transform: scale(1.35) rotate(4deg);
+        opacity: 1;
+      }
+
+      40% {
+        transform: scale(0.95) rotate(-3deg);
+      }
+
+      55% {
+        transform: scale(1.15) rotate(2deg);
+      }
+
+      70% {
+        transform: scale(0.98) rotate(-1deg);
+      }
+
+      85% {
+        transform: scale(1.05) rotate(0.5deg);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
     }
 
     .reward-list {
@@ -1094,6 +1132,46 @@
         box-shadow: none;
       }
     }
+
+    #sound-toggle-btn.sound-toggle {
+      position: absolute;
+      padding: 6px 12px;
+      top: 54px;
+      right: 16px;
+      width: 46px;
+      height: 46px;
+      background: #17221c;
+      border: 2px solid #f3e7bd;
+      box-shadow: 3px 3px 0 #07120d;
+      color: #f3e7bd;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      pointer-events: auto;
+      transition: transform .08s steps(2, end), box-shadow .08s steps(2, end), background .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sound-toggle.muted {
+      background: #0d1f18;
+      color: #7e879f;
+      border-color: #31533f;
+      box-shadow: 3px 3px 0 #07120d;
+    }
+
+    .sound-toggle:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #07120d;
+    }
+
+    .sound-toggle .sound-icon {
+      display: block;
+      line-height: 1;
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -1122,7 +1200,7 @@
     <div class="result">Активной битвы нет<br>Но ты можешь ее найти!</div>
 
     <div class="no-battle-actions">
-      <button id="no-battle-reload-btn">В бой (-1⚡️)</button>
+      <button id="no-battle-reload-btn">Выследить (-1⚡️)</button>
       <button id="no-battle-exit-btn">Выйти</button>
     </div>
 
@@ -1179,6 +1257,10 @@
         <div class="ph-name" id="start-player-name">—</div>
         <div class="ph-energy" id="start-player-energy">—</div>
       </div>
+
+      <!-- <button id="sound-toggle-btn" class="sound-toggle" aria-label="Переключить звук">
+        <span class="sound-icon">On</span>
+      </button> -->
 
       <div class="loading-header">
         <div class="battle-loading-title">ОХОТА</div>
@@ -1429,12 +1511,12 @@
 
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
 
-        document.getElementById("slider-monster").onerror = function () {
-          this.style.display = "none";
+        sliderMonster.onerror = function () {
+          this.onerror = null;
+          this.src = "assets/default.png";
         };
-
         if (tg_data.monster_id != null) {
-          document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+          sliderMonster.src = `assets/${tg_data.monster_id}.png`;
         }
 
         setLoadingProgress(90);
@@ -1458,6 +1540,7 @@
       playerHearts: 3, enemyHP: 0, enemyMaxHP: 0,
       isGameOver: false, isVictory: false,
       difficulty: 1, combo: 0, bestCombo: 0, crit_damage: 0,
+      soundEnabled: true,
       prevCombo: 0,
       audio: null,
       slider: {
@@ -1469,15 +1552,21 @@
     };
 
     let sliderConfig = {
-      round_time_base_ms: 2600, round_time_decay_per_diff: 550, round_time_min_ms: 1350,
-      travel_time_base: 1450, travel_time_min: 700,
+      round_time_base_ms: 3000, round_time_decay_per_diff: 550, round_time_min_ms: 1350,
+      travel_time_base: 1750,
+      travel_time_min: 500,
       min_zone_width: 0.13, max_zone_width: 0.19, min_zone_left: 0.03, max_zone_left_bound: 0.94, zone_gap: 0.035,
-      critical_zone_width: 0.045,
+      critical_zone_width: 0.065,
       critical_min_left: 0.02, critical_max_left_bound: 0.96, critical_gap: 0.025,
       critical_zone_chance: 0.35,
-      max_zones: 4, base_zones: 2, difficulty_zone_multiplier: 8, difficulty_zone_divisor: 3,
-      damageYellow: 7, damageGreen: 24, damageCritical: 45, greenRatio: 0.20
+      max_zones: 4, base_zones: 3,
+      difficulty_zone_multiplier: 8, difficulty_zone_divisor: 3,
+      damageYellow: 7, damageGreen: 24, damageCritical: 45, greenRatio: 0.20,
+      combo_travel_time_reduction: 20,
+      combo_bonus_damage: 2,
     };
+
+    const SOUND_STORAGE_KEY = 'sound_enabled';
 
     const sliderGame = document.getElementById("slider-game");
     const sliderTrack = document.getElementById("slider-track");
@@ -1503,8 +1592,74 @@
       try { state.audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { }
     }
 
+    function initSoundSetting() {
+      if (tg.CloudStorage && typeof tg.CloudStorage.getItem === 'function') {
+        try {
+          tg.CloudStorage.getItem(SOUND_STORAGE_KEY, (error, value) => {
+            if (!error && value !== null && value !== undefined) {
+              state.soundEnabled = value !== 'false';
+            }
+            updateSoundToggleButton();
+          });
+          return;
+        } catch (e) {
+          console.warn('[sound] CloudStorage unavailable', e);
+        }
+      }
+
+      updateSoundToggleButton();
+    }
+
+    function saveSoundSetting() {
+      const value = String(state.soundEnabled);
+
+      if (tg.CloudStorage && typeof tg.CloudStorage.setItem === 'function') {
+        try {
+          tg.CloudStorage.setItem(SOUND_STORAGE_KEY, value, (error) => {
+            if (error) {
+              console.warn('[sound] CloudStorage save failed, fallback to localStorage', error);
+            }
+          });
+          return;
+        } catch (e) {
+          console.warn('[sound] CloudStorage unavailable', e);
+        }
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      saveSoundSetting();
+      updateSoundToggleButton();
+
+      const btn = document.getElementById("sound-toggle-btn");
+
+      if (state.soundEnabled) {
+        initAudio();
+        state.audio?.resume();
+        tone(880, 0.12, "triangle", 0.05);
+        haptic(15);
+      }
+    }
+
+    function updateSoundToggleButton() {
+      const btn = document.getElementById("sound-toggle-btn");
+      if (!btn) return;
+
+      const icon = btn.querySelector(".sound-icon");
+      if (state.soundEnabled) {
+        btn.classList.remove("muted");
+        if (icon) icon.textContent = "On";
+        btn.setAttribute("aria-label", "Выключить звук");
+      } else {
+        btn.classList.add("muted");
+        if (icon) icon.textContent = "Off";
+        btn.setAttribute("aria-label", "Включить звук");
+      }
+    }
+
     function tone(freq, dur = .06, type = "sine", gain = .035) {
-      if (!state.audio) return;
+      if (!state.audio || !state.soundEnabled) return;
       const o = state.audio.createOscillator(), g = state.audio.createGain(), now = state.audio.currentTime;
       o.type = type; o.frequency.setValueAtTime(freq, now);
       g.gain.setValueAtTime(gain, now); g.gain.exponentialRampToValueAtTime(.001, now + dur);
@@ -1515,7 +1670,7 @@
     function haptic(ms = 12) { if (navigator.vibrate) navigator.vibrate(ms); }
 
     function hitSound(perfect = false, damage = 0) {
-      if (!state.audio) return;
+      if (!state.audio || !state.soundEnabled) return;
       const now = state.audio.currentTime;
 
       if (perfect) {
@@ -1588,8 +1743,57 @@
       }
     }
 
+    function victorySound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const notes = [
+        { freq: 523.25, start: 0.00, dur: 0.12 },  // C5
+        { freq: 659.25, start: 0.10, dur: 0.12 },  // E5
+        { freq: 783.99, start: 0.20, dur: 0.12 },  // G5
+        { freq: 1046.50, start: 0.30, dur: 0.18 }, // C6
+        { freq: 1318.51, start: 0.45, dur: 0.35 }, // E6 
+      ];
+
+      notes.forEach(note => {
+        const t = now + note.start;
+
+        const osc1 = state.audio.createOscillator();
+        const gain1 = state.audio.createGain();
+        osc1.type = "square";
+        osc1.frequency.setValueAtTime(note.freq, t);
+        gain1.gain.setValueAtTime(0.0001, t);
+        gain1.gain.exponentialRampToValueAtTime(0.06, t + 0.01);
+        gain1.gain.exponentialRampToValueAtTime(0.001, t + note.dur);
+        osc1.connect(gain1); gain1.connect(state.audio.destination);
+        osc1.start(t); osc1.stop(t + note.dur + 0.02);
+
+        const osc2 = state.audio.createOscillator();
+        const gain2 = state.audio.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(note.freq * 2, t);
+        gain2.gain.setValueAtTime(0.0001, t);
+        gain2.gain.exponentialRampToValueAtTime(0.03, t + 0.01);
+        gain2.gain.exponentialRampToValueAtTime(0.001, t + note.dur);
+        osc2.connect(gain2); gain2.connect(state.audio.destination);
+        osc2.start(t); osc2.stop(t + note.dur + 0.02);
+      });
+
+      const bass = state.audio.createOscillator();
+      const bassGain = state.audio.createGain();
+      bass.type = "sawtooth";
+      bass.frequency.setValueAtTime(130.81, now + 0.45); // C3
+      bassGain.gain.setValueAtTime(0.0001, now + 0.45);
+      bassGain.gain.exponentialRampToValueAtTime(0.05, now + 0.48);
+      bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+      bass.connect(bassGain); bassGain.connect(state.audio.destination);
+      bass.start(now + 0.45); bass.stop(now + 0.90);
+
+      haptic([20, 15, 20, 15, 40]);
+    }
+
     function hurtSound() {
-      if (!state.audio) return;
+      if (!state.audio || !state.soundEnabled) return;
       const now = state.audio.currentTime;
 
       // УРОН ПО ИГРОКУ: низкочастотный "crunch" + "crack"
@@ -1861,7 +2065,7 @@
 
       state.playerHearts = 3;
       state.enemyHP = state.enemyMaxHP;
-      state.combo = 0; state.bestCombo = 0;
+      state.combo = 0; state.bestCombo = 0; critDamage = 0;
       state.isGameOver = false; state.isVictory = false;
       state.slider.active = false; state.slider.zones = [];
       updateHeartsDisplay(); updateEnemyHPDisplay(); updateCombo();
@@ -2007,7 +2211,6 @@
 
       const diff = sliderDifficulty();
       const total = diff.time;
-      const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
 
       function frame(now) {
         if (!state.slider.active || state.isGameOver || state.isVictory || roundStartPerf !== state.slider.roundStartPerf) return;
@@ -2015,6 +2218,13 @@
         const elapsedPerf = now - roundStartPerf;
         const left = Math.max(0, total - elapsedPerf);
         const ratio = left / total;
+
+        const combo = state.combo;
+        const travelTime = Math.max(
+          sliderConfig.travel_time_min,
+          (sliderConfig.travel_time_base - combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
+        );
+
         const pos = (elapsedPerf % travelTime) / travelTime;
         setSliderPosition(pos);
 
@@ -2035,7 +2245,7 @@
           state.combo = 0; updateCombo();
           showNotification("ОПОЗДАЛ!", "#ff3344", 0);
           damagePlayer();
-          hitSound(false);
+          hitSound(false, 0);
           if (!state.isGameOver && !state.isVictory) requestAnimationFrame(startSliderRound);
           return;
         }
@@ -2060,7 +2270,12 @@
 
       const nowUnix = Date.now();
       const elapsedUnix = nowUnix - state.slider.roundStartUnix;
-      const travelTime = Math.max(sliderConfig.travel_time_min, sliderConfig.travel_time_base / state.difficulty);
+
+      const combo = state.combo;
+      const travelTime = Math.max(
+        sliderConfig.travel_time_min,
+        (sliderConfig.travel_time_base - combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
+      );
       const pos = (elapsedUnix % travelTime) / travelTime;
 
       const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
@@ -2090,13 +2305,15 @@
         state.bestCombo = Math.max(state.bestCombo, state.combo);
         state.crit_damage++;
         updateCombo();
-        damageEnemy(sliderConfig.damageCritical);
-        showNotification(`-${sliderConfig.damageCritical} КРИТ!`, "#ff7a00", sliderConfig.damageCritical);
+
+        const comboBonus = state.combo * sliderConfig.combo_bonus_damage;
+        const critDamage = sliderConfig.damageCritical + comboBonus;
+
+        damageEnemy(critDamage);
+        showNotification(`-${critDamage} КРИТ!`, "#ff7a00", critDamage);
         flashScreen();
         sliderMonster.classList.remove("hit"); void sliderMonster.offsetWidth; sliderMonster.classList.add("hit");
-        hitSound(true, sliderConfig.damageCritical);
-        setTimeout(() => tone(1480, .12, "triangle", .04), 35);
-        haptic([18, 35, 18]);
+        hitSound(true, critDamage);
 
         const newRoundStartUnix = Date.now();
         state.slider.roundStartPerf = performance.now();
@@ -2131,7 +2348,10 @@
       const half = z.width / 2;
       const accuracy = Math.max(0, 1 - Math.abs(pos - center) / half);
 
-      const amount = Math.round(sliderConfig.damageYellow + (sliderConfig.damageGreen - sliderConfig.damageYellow) * accuracy);
+      const comboBonus = state.combo * sliderConfig.combo_bonus_damage;
+      const baseDamage = Math.round(sliderConfig.damageYellow + (sliderConfig.damageGreen - sliderConfig.damageYellow) * accuracy);
+      const amount = baseDamage + comboBonus;
+
       const inGreen = Math.abs(pos - center) <= (z.width * sliderConfig.greenRatio) / 2;
 
       state.combo++; state.bestCombo = Math.max(state.bestCombo, state.combo);
@@ -2201,6 +2421,17 @@
 
       victoryOverlay.classList.add("show");
 
+      const victoryTitle = victoryOverlay.querySelector("h1");
+      if (victoryTitle) {
+        victoryTitle.classList.remove("celebrate");
+        void victoryTitle.offsetWidth;
+        victoryTitle.classList.add("celebrate");
+      }
+
+      initAudio();
+      state.audio?.resume();
+      victorySound();
+
       finishBattle("victory").catch(err => console.error("[battle] finish failed", err));
     }
 
@@ -2251,15 +2482,18 @@
 
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
+        state.crit_damage = 0;
         battleSeed = Number(battle.seed || 0) >>> 0;
         apiReady = true;
 
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
-        document.getElementById("slider-monster").onerror = function () {
-          this.style.display = "none";
+
+        sliderMonster.onerror = function () {
+          this.onerror = null;
+          this.src = "assets/default.png";
         };
         if (tg_data.monster_id != null) {
-          document.getElementById("slider-monster").src = `assets/${tg_data.monster_id}.png`;
+          sliderMonster.src = `assets/${tg_data.monster_id}.png`;
         }
 
         if (battle.slider_config) {
@@ -2319,7 +2553,13 @@
         battleSeed = Number(battle.seed || 0) >>> 0;
         apiReady = true;
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
-        if (tg_data.monster_id != null) sliderMonster.src = `assets/${tg_data.monster_id}.png`;
+        sliderMonster.onerror = function () {
+          this.onerror = null;
+          this.src = "assets/default.png";
+        };
+        if (tg_data.monster_id != null) {
+          sliderMonster.src = `assets/${tg_data.monster_id}.png`;
+        }
         gameOverOverlay.classList.remove("show");
         startGame();
         beginBattle();
@@ -2356,6 +2596,14 @@
       document.getElementById("no-battle-reload-btn").addEventListener("click", function () {
         void startNewBattle(this);
       });
+
+      const soundToggleBtn = document.getElementById("sound-toggle-btn");
+      if (soundToggleBtn) {
+        soundToggleBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleSound();
+        });
+      }
     }
 
     setupEventListeners();
