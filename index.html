@@ -53,6 +53,50 @@
       z-index: 10;
     }
 
+    .player-header .ph-energy.zero {
+      color: #e95732;
+      text-shadow: 0 0 6px rgba(233, 87, 50, 0.4);
+      animation: energyPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes energyPulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.65;
+      }
+    }
+
+    .player-header .ph-energy.zero::before {
+      color: #e95732;
+    }
+
+    .energy-warning {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: #17221c;
+      border: 2px solid #e95732;
+      color: #e95732;
+      font-size: 7px;
+      letter-spacing: 1px;
+      padding: 4px 8px;
+      box-shadow: 2px 2px 0 #07120d;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+      z-index: 20;
+    }
+
+    .ph-energy.zero:hover .energy-warning {
+      opacity: 1;
+    }
+
     .player-header .ph-name {
       display: flex;
       align-items: center;
@@ -401,6 +445,60 @@
       }
     }
 
+    #slider-monster.death {
+      animation:
+        monsterShake 0.09s linear 14,
+        monsterFadeOut 1.25s ease-out forwards;
+      z-index: 50;
+    }
+
+    /* Частая-частая мелкая тряска */
+    @keyframes monsterShake {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%);
+      }
+
+      20% {
+        transform: translate(calc(-50% - 4px), calc(-50% - 3px));
+      }
+
+      40% {
+        transform: translate(calc(-50% + 4px), calc(-50% + 2px));
+      }
+
+      60% {
+        transform: translate(calc(-50% - 3px), calc(-50% + 4px));
+      }
+
+      80% {
+        transform: translate(calc(-50% + 3px), calc(-50% - 3px));
+      }
+    }
+
+    @keyframes monsterFadeOut {
+      0% {
+        opacity: 0.7;
+      }
+
+      40% {
+        opacity: 0.65;
+      }
+
+      70% {
+        opacity: 0.4;
+      }
+
+      90% {
+        opacity: 0.15;
+      }
+
+      100% {
+        opacity: 0;
+      }
+    }
+
     #slider-game {
       width: min(92vw, 760px);
       display: none;
@@ -443,15 +541,22 @@
       background: linear-gradient(90deg, #d7a52d 0%, #e6c448 28%, #98c94e 43%, #54b957 50%, #98c94e 57%, #e6c448 72%, #d7a52d 100%);
       transition: opacity .12s, filter .12s;
       pointer-events: none;
+
+      animation: zoneAppear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation-delay: calc(var(--zone-index, 0) * 0.07s);
+      transform-origin: center center;
     }
 
     .slider-zone.hit {
-      opacity: 0;
-      filter: grayscale(1);
+      opacity: 0 !important;
+      filter: grayscale(1) !important;
+      animation: none;
     }
 
     .slider-zone.critical {
       background: #ffb000;
+      animation: zoneAppearCritical 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      animation-delay: calc(var(--zone-index, 0) * 0.07s);
     }
 
     .slider-zone .zone-green {
@@ -462,6 +567,54 @@
       width: 20%;
       background: #54b957;
       pointer-events: none;
+    }
+
+    @keyframes zoneAppear {
+      0% {
+        transform: scaleY(0.15) scaleX(0.6);
+        opacity: 0;
+        filter: brightness(2.5);
+      }
+
+      35% {
+        opacity: 1;
+        filter: brightness(1.8);
+      }
+
+      70% {
+        transform: scaleY(1.12) scaleX(1.02);
+        filter: brightness(1.15);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes zoneAppearCritical {
+      0% {
+        transform: scaleY(0.15) scaleX(0.4);
+        opacity: 0;
+        filter: brightness(3) drop-shadow(0 0 12px #ffb000);
+      }
+
+      30% {
+        opacity: 1;
+        filter: brightness(2.2) drop-shadow(0 0 18px #ffb000);
+      }
+
+      60% {
+        transform: scaleY(1.2) scaleX(1.05);
+        filter: brightness(1.5) drop-shadow(0 0 10px #ffb000);
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: brightness(1) drop-shadow(0 0 4px #ffb000);
+      }
     }
 
     #slider-knob {
@@ -485,6 +638,37 @@
       top: 7px;
       bottom: 7px;
       background: #e95732;
+    }
+
+    #slider-knob.bounce {
+      animation: knobBounce .25s ease-out;
+    }
+
+    @keyframes knobBounce {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+      }
+
+      30% {
+        transform: translate(-50%, -50%) scale(1.35, 0.75);
+        filter: brightness(2.2);
+      }
+
+      55% {
+        transform: translate(-50%, -50%) scale(0.85, 1.2);
+        filter: brightness(1.4);
+      }
+
+      80% {
+        transform: translate(-50%, -50%) scale(1.08, 0.92);
+        filter: brightness(1.1);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        filter: brightness(1);
+      }
     }
 
     #slider-timer {
@@ -710,20 +894,25 @@
     .reward-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 8px;
+      margin-top: 6px;
     }
 
     .reward-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
       color: #f3e7bd;
       font-size: 11px;
       letter-spacing: 0.5px;
-      line-height: 1.4;
+      line-height: 1.5;
+      min-height: 1.5em;
+      transition: opacity 0.3s, filter 0.3s;
     }
 
     .reward-item.main {
       color: #e7d79e;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       text-shadow: 2px 2px 0 #07120d;
     }
@@ -731,8 +920,120 @@
     .reward-item.bonus {
       color: #9eaf86;
       font-size: 10px;
-      padding-left: 8px;
-      border-left: 2px solid #31533f;
+    }
+
+    .reward-item .coin-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 1em;
+      font-size: 0.95em;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .reward-item.main .coin-icon {
+      font-size: 1.1em;
+    }
+
+    .reward-item .reward-text {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .reward-item.locked {
+      color: #5a6b55 !important;
+      opacity: 0.55;
+      filter: grayscale(0.7);
+      text-shadow: none !important;
+    }
+
+    .reward-item.locked .coin-icon {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    .reward-item.locked .reward-text {
+      font-style: italic;
+      letter-spacing: 0.3px;
+    }
+
+    .reward-item.reward-appear {
+      animation: rewardSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .reward-item.main.reward-appear {
+      animation: rewardSlideInMain 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .reward-item.reward-appear .coin-icon {
+      animation: coinSpin 0.6s ease-out;
+    }
+
+    @keyframes rewardSlideIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-20px);
+        filter: brightness(0.5);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateX(4px);
+        filter: brightness(1.3);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes rewardSlideInMain {
+      0% {
+        opacity: 0;
+        transform: translateX(-24px) scale(0.9);
+        filter: brightness(0.5);
+      }
+
+      40% {
+        opacity: 1;
+        transform: translateX(4px) scale(1.04);
+        filter: brightness(1.4);
+      }
+
+      70% {
+        transform: translateX(-2px) scale(0.99);
+        filter: brightness(1.1);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes coinSpin {
+      0% {
+        transform: rotateY(0deg) scale(1);
+      }
+
+      30% {
+        transform: rotateY(180deg) scale(1.25);
+      }
+
+      60% {
+        transform: rotateY(360deg) scale(1.1);
+      }
+
+      100% {
+        transform: rotateY(540deg) scale(1);
+      }
     }
 
     .reward-item.empty {
@@ -1045,6 +1346,7 @@
       margin-top: 8px;
     }
 
+
     /* =========================
    BUTTON INTERACTIONS
    ========================= */
@@ -1273,70 +1575,93 @@
           <div class="encounter-content">
             <div class="dossier-row">
               <span class="dossier-label">[ИМЯ]:</span>
-              <span class="m-name" id="dossier-name">ОЖИДАНИЕ ДАННЫХ...</span>
+              <span class="m-name" id="dossier-name"></span>
             </div>
             <div class="dossier-row">
               <span class="dossier-label">[ОПИСАНИЕ]:</span>
-              <span class="m-desc" id="dossier-desc">Разведка уточняет параметры угрозы.</span>
+              <span class="m-desc" id="dossier-desc"></span>
             </div>
-          </div>
-
-          <div class="encounter-actions">
-            <button id="start-battle-btn">НА ОХОТУ!</button>
           </div>
         </div>
-      </div>
 
-      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
-    </div>
-
-    <div id="game-over" class="overlay">
-      <div class="player-header">
-        <div class="ph-name" id="gameover-player-name">—</div>
-        <div class="ph-energy" id="gameover-player-energy">—</div>
-      </div>
-
-      <h1>ПОГИБ</h1>
-      <div class="result" id="gameover-result"></div>
-      <div class="game-over-actions">
-        <button id="end-btn">Выйти</button>
-        <button id="retry-btn">Заново (-1⚡️)</button>
-      </div>
-
-      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
-    </div>
-
-    <div id="victory" class="overlay">
-      <div class="player-header">
-        <div class="ph-name" id="victory-player-name">—</div>
-        <div class="ph-energy" id="victory-player-energy">—</div>
-      </div>
-
-      <h1>ПОБЕДА!</h1>
-
-      <div class="dossier-wrapper">
-        <div class="dossier-pin"></div>
-        <div class="monster-encounter reward-dossier">
-          <div class="encounter-content">
-            <div class="dossier-row">
-              <span class="dossier-label">[МОНЕТЫ]:</span>
-              <div id="reward-coins-list" class="reward-list"></div>
-            </div>
-            <div class="dossier-row">
-              <span class="dossier-label">[ПРЕДМЕТЫ]:</span>
-              <div id="reward-items-list" class="reward-list"></div>
-            </div>
-          </div>
-
-          <div class="encounter-actions" style="flex-direction: column; align-items: stretch;">
-            <button id="next-btn">Следующий бой (-1⚡️)</button>
-            <button id="exit-btn">Выйти</button>
-          </div>
+        <div class="encounter-actions">
+          <button id="start-battle-btn">НА ОХОТУ!</button>
         </div>
       </div>
-
-      <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
     </div>
+
+    <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
+  </div>
+
+  <div id="game-over" class="overlay">
+    <div class="player-header">
+      <div class="ph-name" id="gameover-player-name">—</div>
+      <div class="ph-energy" id="gameover-player-energy">—</div>
+    </div>
+
+    <h1>ПОГИБ</h1>
+    <div class="result" id="gameover-result"></div>
+    <div class="game-over-actions">
+      <button id="end-btn">Выйти</button>
+      <button id="retry-btn">Заново (-1⚡️)</button>
+    </div>
+
+    <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
+  </div>
+
+  <div id="victory" class="overlay">
+    <div class="player-header">
+      <div class="ph-name" id="victory-player-name">—</div>
+      <div class="ph-energy" id="victory-player-energy">—</div>
+    </div>
+
+    <h1>ПОБЕДА!</h1>
+
+    <div class="dossier-wrapper">
+      <div class="dossier-pin"></div>
+      <div class="monster-encounter reward-dossier">
+        <div class="encounter-content">
+          <div class="dossier-row">
+            <span class="dossier-label">[МОНЕТЫ]:</span>
+            <div id="reward-coins-list" class="reward-list">
+              <div class="reward-item main locked" id="reward-main">
+                <span class="coin-icon">💰</span>
+                <span class="reward-text">Основная награда</span>
+              </div>
+              <div class="reward-item bonus locked" id="reward-combo">
+                <span class="coin-icon">🔗</span>
+                <span class="reward-text">Бонус за комбо</span>
+              </div>
+              <div class="reward-item bonus locked" id="reward-crit">
+                <span class="coin-icon">💥</span>
+                <span class="reward-text">Бонус за криты</span>
+              </div>
+              <div class="reward-item bonus locked" id="reward-no-damage">
+                <span class="coin-icon">🛡️</span>
+                <span class="reward-text">Бонус без урона</span>
+              </div>
+            </div>
+          </div>
+          <div class="dossier-row">
+            <span class="dossier-label">[ПРЕДМЕТЫ]:</span>
+            <div id="reward-items-list" class="reward-list">
+              <div class="reward-item locked" id="reward-items">
+                <span class="coin-icon">📦</span>
+                <span class="reward-text">Добыча не найдена</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="encounter-actions" style="flex-direction: column; align-items: stretch;">
+          <button id="next-btn">Следующий бой (-1⚡️)</button>
+          <button id="exit-btn">Выйти</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pioneer-footer">OOO «Пионерлагерь Ромашка»</div>
+  </div>
   </div>
 
   <script>
@@ -1355,9 +1680,12 @@
     };
 
     function setPlayerInfo() {
-      const user_name = tg_data.user.user_name || "";
-      const user_custom_title = tg_data.user.user_custom_title || "ПИОНЕР";
-      const energy = tg_data.user.energy ?? "—";
+      const user_name = tg_data.user?.user_name || "";
+      const user_custom_title = tg_data.user?.user_custom_title || "ПИОНЕР";
+      const rawEnergy = tg_data.user?.energy;
+      const energyNum = Number(rawEnergy);
+      const energy = Number.isFinite(energyNum) ? energyNum : "—";
+      const isZeroEnergy = Number.isFinite(energyNum) && energyNum <= 0;
 
       const nameIds = [
         "loading-player-name",
@@ -1381,7 +1709,33 @@
 
       energyIds.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.innerHTML = energy;
+        if (!el) return;
+
+        el.innerHTML = `
+      <span class="energy-value">${energy}</span>
+      ${isZeroEnergy ? '<span class="energy-warning">НЕТ ЭНЕРГИИ</span>' : ''}
+    `;
+        el.classList.toggle("zero", isZeroEnergy);
+      });
+
+      updateEnergyState();
+    }
+
+    function updateEnergyState() {
+      const rawEnergy = tg_data.user?.energy;
+      const energyNum = Number(rawEnergy);
+      const noEnergy = !Number.isFinite(energyNum) || energyNum <= 0;
+
+      const buttonsToDisable = [
+        document.getElementById("no-battle-reload-btn"),
+        document.getElementById("next-btn"),
+        document.getElementById("retry-btn")
+      ];
+
+      buttonsToDisable.forEach(btn => {
+        if (!btn) return;
+        if (btn.dataset.processing === "true") return;
+        btn.disabled = noEnergy;
       });
     }
 
@@ -1491,7 +1845,7 @@
         setLoadingProgress(58);
 
         if (battle.slider_config) {
-          sliderConfig = { ...sliderConfig, ...battle.slider_config };
+          sliderConfig = { ...battle.slider_config };
         }
 
         setLoadingProgress(68);
@@ -1540,9 +1894,12 @@
       playerHearts: 3, enemyHP: 0, enemyMaxHP: 0,
       isGameOver: false, isVictory: false,
       difficulty: 1, combo: 0, bestCombo: 0, crit_damage: 0,
+      playerDamageTaken: 0,
       soundEnabled: true,
       prevCombo: 0,
       audio: null,
+      _timeOffset: 0,
+      _prevDirection: 0,
       slider: {
         zones: [], position: 0, active: false,
         roundStart: 0, roundStartUnix: 0, rafId: null
@@ -1551,20 +1908,7 @@
       finished: false, finishingPromise: null, nextSeq: 1, roundIndex: 0,
     };
 
-    let sliderConfig = {
-      round_time_base_ms: 3000, round_time_decay_per_diff: 550, round_time_min_ms: 1350,
-      travel_time_base: 1750,
-      travel_time_min: 500,
-      min_zone_width: 0.13, max_zone_width: 0.19, min_zone_left: 0.03, max_zone_left_bound: 0.94, zone_gap: 0.035,
-      critical_zone_width: 0.065,
-      critical_min_left: 0.02, critical_max_left_bound: 0.96, critical_gap: 0.025,
-      critical_zone_chance: 0.35,
-      max_zones: 4, base_zones: 3,
-      difficulty_zone_multiplier: 8, difficulty_zone_divisor: 3,
-      damageYellow: 7, damageGreen: 24, damageCritical: 45, greenRatio: 0.20,
-      combo_travel_time_reduction: 20,
-      combo_bonus_damage: 2,
-    };
+    let sliderConfig = null;
 
     const SOUND_STORAGE_KEY = 'sound_enabled';
 
@@ -1792,11 +2136,56 @@
       haptic([20, 15, 20, 15, 40]);
     }
 
+    function coinSound(main = false) {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const baseFreq = main ? 1600 : 2200;
+      const volume = main ? 0.07 : 0.045;
+
+      const osc1 = state.audio.createOscillator();
+      const gain1 = state.audio.createGain();
+      osc1.type = "triangle";
+      osc1.frequency.setValueAtTime(baseFreq, now);
+      osc1.frequency.exponentialRampToValueAtTime(baseFreq * 0.85, now + 0.08);
+      gain1.gain.setValueAtTime(0.0001, now);
+      gain1.gain.exponentialRampToValueAtTime(volume, now + 0.005);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc1.connect(gain1); gain1.connect(state.audio.destination);
+      osc1.start(now); osc1.stop(now + 0.18);
+
+      const osc2 = state.audio.createOscillator();
+      const gain2 = state.audio.createGain();
+      osc2.type = "sine";
+      osc2.frequency.setValueAtTime(baseFreq * 2.4, now);
+      osc2.frequency.exponentialRampToValueAtTime(baseFreq * 1.8, now + 0.06);
+      gain2.gain.setValueAtTime(0.0001, now);
+      gain2.gain.exponentialRampToValueAtTime(volume * 0.4, now + 0.003);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc2.connect(gain2); gain2.connect(state.audio.destination);
+      osc2.start(now); osc2.stop(now + 0.12);
+
+      const osc3 = state.audio.createOscillator();
+      const gain3 = state.audio.createGain();
+      osc3.type = "square";
+      osc3.frequency.setValueAtTime(baseFreq * 0.5, now);
+      gain3.gain.setValueAtTime(0.0001, now);
+      gain3.gain.exponentialRampToValueAtTime(volume * 0.15, now + 0.002);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc3.connect(gain3); gain3.connect(state.audio.destination);
+      osc3.start(now); osc3.stop(now + 0.07);
+
+      if (main) {
+        haptic([8, 4, 8]);
+      } else {
+        haptic(5);
+      }
+    }
+
     function hurtSound() {
       if (!state.audio || !state.soundEnabled) return;
       const now = state.audio.currentTime;
 
-      // УРОН ПО ИГРОКУ: низкочастотный "crunch" + "crack"
       const osc1 = state.audio.createOscillator();
       const gain1 = state.audio.createGain();
       osc1.type = "sawtooth";
@@ -1807,7 +2196,6 @@
       osc1.connect(gain1); gain1.connect(state.audio.destination);
       osc1.start(now); osc1.stop(now + 0.3);
 
-      // Трещащая верхушка
       const osc2 = state.audio.createOscillator();
       const gain2 = state.audio.createGain();
       osc2.type = "square";
@@ -1819,6 +2207,67 @@
       osc2.start(now); osc2.stop(now + 0.17);
 
       haptic([35, 25, 45]);
+    }
+
+    function monsterDeathSound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const osc1 = state.audio.createOscillator();
+      const gain1 = state.audio.createGain();
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(200, now);
+      osc1.frequency.exponentialRampToValueAtTime(35, now + 0.7);
+      gain1.gain.setValueAtTime(0.13, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      osc1.connect(gain1); gain1.connect(state.audio.destination);
+      osc1.start(now); osc1.stop(now + 0.95);
+
+      const osc2 = state.audio.createOscillator();
+      const gain2 = state.audio.createGain();
+      osc2.type = "square";
+      osc2.frequency.setValueAtTime(440, now);
+      osc2.frequency.exponentialRampToValueAtTime(70, now + 0.45);
+      gain2.gain.setValueAtTime(0.07, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      osc2.connect(gain2); gain2.connect(state.audio.destination);
+      osc2.start(now); osc2.stop(now + 0.6);
+
+      haptic([30, 20, 40, 25, 55]);
+    }
+
+    function deathFlash() {
+      flashOverlay.style.background = "#ff6644";
+      flashOverlay.classList.remove("flash");
+      void flashOverlay.offsetWidth;
+      flashOverlay.classList.add("flash");
+
+      setTimeout(() => {
+        flashOverlay.style.background = "#63b85b";
+      }, 300);
+    }
+
+    function bounceKnob() {
+      sliderKnob.classList.remove("bounce");
+      void sliderKnob.offsetWidth;
+      sliderKnob.classList.add("bounce");
+    }
+
+    function wallBounceSound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const osc = state.audio.createOscillator();
+      const gain = state.audio.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
+      gain.gain.setValueAtTime(0.025, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      osc.connect(gain); gain.connect(state.audio.destination);
+      osc.start(now); osc.stop(now + 0.08);
+
+      haptic(4);
     }
 
     const telemetry = {
@@ -2047,25 +2496,49 @@
 
     // ==================== GAMEPLAY ====================
     function startGame() {
+      if (!sliderConfig || !sliderConfig.round_time_base_ms) {
+        console.error("[game] Slider config not loaded, cannot start");
+        return;
+      }
+
       startTelemetry();
       state.finished = false; state.finishingPromise = null;
       state.log = []; state.logSent = 0; state.nextSeq = 1; state.roundIndex = 0;
       logFlushInFlight = false;
 
+      const rewardDefaults = [
+        { id: "reward-main", icon: "💰", text: "Основная награда" },
+        { id: "reward-combo", icon: "🔗", text: "Бонус за комбо" },
+        { id: "reward-crit", icon: "💥", text: "Бонус за криты" },
+        { id: "reward-no-damage", icon: "🛡️", text: "Бонус без урона" },
+        { id: "reward-items", icon: "📦", text: "Добыча не найдена" },
+      ];
+
+      rewardDefaults.forEach(r => {
+        const el = document.getElementById(r.id);
+        if (!el) return;
+        el.classList.add("locked");
+        el.classList.remove("reward-appear");
+        const iconEl = el.querySelector(".coin-icon");
+        const textEl = el.querySelector(".reward-text");
+        if (iconEl) iconEl.textContent = r.icon;
+        if (textEl) textEl.textContent = r.text;
+      });
+      // === КОНЕЦ СБРОСА ===
+
       if (tg_data) {
         const mName = tg_data.monster_name || "[ДАННЫЕ УДАЛЕНЫ]";
         const mDesc = tg_data.monster_desc || "[ДАННЫЕ УДАЛЕНЫ]";
-
         const nameEl = document.getElementById("dossier-name");
         const descEl = document.getElementById("dossier-desc");
-
         if (nameEl) nameEl.textContent = mName;
         if (descEl) descEl.innerHTML = mDesc;
       }
 
       state.playerHearts = 3;
       state.enemyHP = state.enemyMaxHP;
-      state.combo = 0; state.bestCombo = 0; critDamage = 0;
+      state.combo = 0; state.bestCombo = 0; state.crit_damage = 0;
+      state.playerDamageTaken = 0;
       state.isGameOver = false; state.isVictory = false;
       state.slider.active = false; state.slider.zones = [];
       updateHeartsDisplay(); updateEnemyHPDisplay(); updateCombo();
@@ -2082,6 +2555,15 @@
       gameLog("start", { battle_id: battle.id, game_mode: "slider", hp: state.enemyMaxHP });
       initAudio(); state.audio?.resume();
       battleStartOverlay.classList.remove("show");
+
+      sliderMonster.style.opacity = "0.7";
+      sliderMonster.classList.remove("death", "hit");
+
+      state.slider.position = 0;
+      state.slider._timeOffset = 0;
+      state.slider._prevDirection = 1;
+      setSliderPosition(0);
+
       setTimeout(() => {
         if (state.isGameOver || state.isVictory) return;
         startSliderRound();
@@ -2094,6 +2576,8 @@
       state.slider.rafId = null;
       state.slider.zones = [];
       state.slider.movementParams = null;
+      state.slider._timeOffset = 0;
+      state.slider._prevDirection = 1;
       sliderTrack.querySelectorAll(".slider-zone").forEach(el => el.remove());
       if (!sliderKnob.isConnected) sliderTrack.appendChild(sliderKnob);
       sliderTimerFill.style.width = "100%";
@@ -2165,11 +2649,19 @@
         el.dataset.zone = i;
         el.style.left = (z.left * 100) + "%";
         el.style.width = (z.width * 100) + "%";
+        el.style.setProperty('--zone-index', i);
+
         if (!z.critical) {
           const green = document.createElement("div");
           green.className = "zone-green";
           el.appendChild(green);
         }
+
+        el.addEventListener('animationend', () => {
+          el.style.animation = 'none';
+          el.style.opacity = '1';
+        }, { once: true });
+
         fragment.appendChild(el);
         z.el = el;
       });
@@ -2189,13 +2681,27 @@
         round_start: roundStartUnix,
       });
 
-      state.slider.position = 0;
+      const currentPos = state.slider.position;
+      const currentDirection = state.slider._prevDirection || 1;
+
+      const combo = state.combo;
+      const travelTime = Math.max(
+        sliderConfig.travel_time_min,
+        (sliderConfig.travel_time_base - combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
+      );
+
+      const offset = currentDirection === 1
+        ? currentPos * travelTime
+        : (2 - currentPos) * travelTime;
+
+      state.slider.position = currentPos;
       state.slider.roundStartUnix = roundStartUnix;
       state.slider.roundStartPerf = performance.now();
+      state.slider._prevDirection = currentDirection;
+      state.slider._timeOffset = offset;
       state.slider.active = true;
 
       renderSliderZones();
-      setSliderPosition(0);
       const requiredCount = state.slider.zones.filter(z => z.required).length;
       sliderStatus.textContent = `ПОПАДИ ${requiredCount} • РЫЖИЕ = КРИТ!`;
 
@@ -2211,6 +2717,7 @@
 
       const diff = sliderDifficulty();
       const total = diff.time;
+      const timeOffset = state.slider._timeOffset || 0;
 
       function frame(now) {
         if (!state.slider.active || state.isGameOver || state.isVictory || roundStartPerf !== state.slider.roundStartPerf) return;
@@ -2225,8 +2732,19 @@
           (sliderConfig.travel_time_base - combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
         );
 
-        const pos = (elapsedPerf % travelTime) / travelTime;
+        const totalCycle = travelTime * 2;
+        const elapsedWithOffset = elapsedPerf + timeOffset;
+        const cyclePhase = (elapsedWithOffset % totalCycle) / travelTime;
+        const pos = cyclePhase <= 1 ? cyclePhase : 2 - cyclePhase;
+        const direction = cyclePhase <= 1 ? 1 : -1;
+
         setSliderPosition(pos);
+
+        if (state.slider._prevDirection && state.slider._prevDirection !== direction) {
+          bounceKnob();
+          wallBounceSound();
+        }
+        state.slider._prevDirection = direction;
 
         sliderTimerFill.style.width = (ratio * 100) + "%";
         sliderTimerFill.classList.toggle("warn", ratio < .28);
@@ -2270,19 +2788,25 @@
 
       const nowUnix = Date.now();
       const elapsedUnix = nowUnix - state.slider.roundStartUnix;
+      const timeOffset = state.slider._timeOffset || 0;
 
       const combo = state.combo;
       const travelTime = Math.max(
         sliderConfig.travel_time_min,
         (sliderConfig.travel_time_base - combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
       );
-      const pos = (elapsedUnix % travelTime) / travelTime;
+
+      const totalCycle = travelTime * 2;
+      const elapsedWithOffset = elapsedUnix + timeOffset;
+      const cyclePhase = (elapsedWithOffset % totalCycle) / travelTime;
+      const pos = cyclePhase <= 1 ? cyclePhase : 2 - cyclePhase;
 
       const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
 
       gameLog("tap", {
         input_seq: inputSeq, input_kind: inputKind, input_age_ms: tapInputAge, input_trusted: inputTrusted,
-        source: sourceEvent ? (sourceEvent.code === "Space" ? "keyboard" : "pointer") : "programmatic"
+        source: sourceEvent ? (sourceEvent.code === "Space" ? "keyboard" : "pointer") : "programmatic",
+        time_offset: state.slider._timeOffset || 0
       });
 
       if (zoneIndex < 0) {
@@ -2318,6 +2842,16 @@
         const newRoundStartUnix = Date.now();
         state.slider.roundStartPerf = performance.now();
         state.slider.roundStartUnix = newRoundStartUnix;
+
+        const currentPos = state.slider.position;
+        const currentDir = state.slider._prevDirection || 1;
+        const travelTime = Math.max(
+          sliderConfig.travel_time_min,
+          (sliderConfig.travel_time_base - state.combo * sliderConfig.combo_travel_time_reduction) / state.difficulty
+        );
+        state.slider._timeOffset = currentDir === 1
+          ? currentPos * travelTime
+          : (2 - currentPos) * travelTime;
 
         gameLog("round", {
           round: state.roundIndex,
@@ -2380,6 +2914,7 @@
 
     function damagePlayer() {
       state.playerHearts--;
+      state.playerDamageTaken++;
       const heart = heartsSection.querySelector(`[data-heart="${state.playerHearts}"]`);
       if (heart) { heart.classList.add("breaking"); setTimeout(() => heart.classList.remove("breaking"), 400); }
       updateHeartsDisplay(); shakeScreen();
@@ -2392,32 +2927,18 @@
       state.slider.active = false;
       if (state.slider.rafId) cancelAnimationFrame(state.slider.rafId);
 
-      const coinsList = document.getElementById("reward-coins-list");
-      const itemsList = document.getElementById("reward-items-list");
+      deathFlash();
+      monsterDeathSound();
+      shakeScreen();
 
-      if (coinsList && tg_data) {
-        const mainMoney = Number(tg_data.money_drop) || 0;
-        const comboBonus = Math.trunc(state.bestCombo / 10);
-        const critBonus = state.crit_damage;
+      sliderMonster.classList.remove("hit", "death");
+      void sliderMonster.offsetWidth;
+      sliderMonster.classList.add("death");
 
-        let coinsHTML = `<div class="reward-item main">+💰 ${mainMoney}</div>`;
-        if (comboBonus > 0) {
-          coinsHTML += `<div class="reward-item bonus">+💰 ${comboBonus} (комбо ×${state.bestCombo})</div>`;
-        }
-        if (critBonus > 0) {
-          coinsHTML += `<div class="reward-item bonus">+💰 ${critBonus} (критические удары)</div>`;
-        }
-        coinsList.innerHTML = coinsHTML;
-      }
+      await new Promise(resolve => setTimeout(resolve, 1400));
 
-      if (itemsList && tg_data) {
-        const items = Array.isArray(tg_data.items_drop) ? tg_data.items_drop : [];
-        if (items.length > 0) {
-          itemsList.innerHTML = items.map(item => `<div class="reward-item">${item}</div>`).join('');
-        } else {
-          itemsList.innerHTML = `<div class="reward-item empty">добыча не найдена</div>`;
-        }
-      }
+      sliderMonster.classList.remove("death");
+      sliderMonster.style.opacity = "0";
 
       victoryOverlay.classList.add("show");
 
@@ -2432,6 +2953,59 @@
       state.audio?.resume();
       victorySound();
 
+      const mainMoney = (tg_data && Number(tg_data.money_drop)) || 0;
+      const comboBonus = Math.trunc(state.bestCombo / 5);
+      const critBonus = state.crit_damage * 2;
+      const noDamageBonus = (state.playerDamageTaken === 0) ? 5 : 0;
+      const items = (tg_data && Array.isArray(tg_data.items_drop)) ? tg_data.items_drop : [];
+
+      const rewardMain = document.getElementById("reward-main");
+      const rewardCombo = document.getElementById("reward-combo");
+      const rewardCrit = document.getElementById("reward-crit");
+      const rewardNoDamage = document.getElementById("reward-no-damage");
+      const rewardItems = document.getElementById("reward-items");
+
+      function unlock(el, text, icon, isMain = false) {
+        const iconEl = el.querySelector(".coin-icon");
+        const textEl = el.querySelector(".reward-text");
+        if (iconEl) iconEl.textContent = icon;
+        if (textEl) textEl.textContent = text;
+        el.classList.remove("locked");
+        el.classList.add("reward-appear");
+        coinSound(isMain);
+      }
+
+      function keepLocked(el, text, icon) {
+        const iconEl = el.querySelector(".coin-icon");
+        const textEl = el.querySelector(".reward-text");
+        if (iconEl) iconEl.textContent = icon;
+        if (textEl) textEl.textContent = text;
+      }
+
+      setTimeout(() => {
+        setTimeout(() => unlock(rewardMain, `+${mainMoney}`, "💰", true), 0);
+
+        setTimeout(() => {
+          if (comboBonus > 0) unlock(rewardCombo, `+${comboBonus} комбо ×${state.bestCombo}`, "💰", false);
+          else keepLocked(rewardCombo, "Нужно комбо ×5", "🔗");
+        }, 280);
+
+        setTimeout(() => {
+          if (critBonus > 0) unlock(rewardCrit, `+${critBonus} криты ×${state.crit_damage}`, "💰", false);
+          else keepLocked(rewardCrit, "Крит. ударов: 0", "💥");
+        }, 560);
+
+        setTimeout(() => {
+          if (noDamageBonus > 0) unlock(rewardNoDamage, `+${noDamageBonus} без урона`, "💰", false);
+          else keepLocked(rewardNoDamage, "Не получать урон", "🛡️");
+        }, 840);
+
+        setTimeout(() => {
+          if (items.length > 0) unlock(rewardItems, items.join(", "), "📦", false);
+          else keepLocked(rewardItems, "Добыча не найдена", "📦");
+        }, 1120);
+      }, 400);
+
       finishBattle("victory").catch(err => console.error("[battle] finish failed", err));
     }
 
@@ -2444,7 +3018,10 @@
     }
 
     async function startNewBattle(sourceBtn = null) {
-      if (sourceBtn) sourceBtn.disabled = true;
+      if (sourceBtn) {
+        sourceBtn.disabled = true;
+        sourceBtn.dataset.processing = "true";
+      }
 
       try {
         document.getElementById("no-battle").classList.remove("show");
@@ -2483,6 +3060,7 @@
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
         state.crit_damage = 0;
+        state.playerDamageTaken = 0;
         battleSeed = Number(battle.seed || 0) >>> 0;
         apiReady = true;
 
@@ -2497,7 +3075,7 @@
         }
 
         if (battle.slider_config) {
-          sliderConfig = { ...sliderConfig, ...battle.slider_config };
+          sliderConfig = { ...battle.slider_config };
         }
 
         setLoadingProgress(85);
@@ -2518,7 +3096,13 @@
 
       } catch (error) {
         console.error("[battle] start new battle failed:", error);
-        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344", 0);
+
+        const errorMsg = error.message || "";
+        if (errorMsg.includes("Not enough energy") || errorMsg.includes("energy") || errorMsg.includes("409")) {
+          showNotification("НЕДОСТАТОЧНО ЭНЕРГИИ", "#e95732", 0);
+        } else {
+          showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344", 0);
+        }
 
         const loadingScreen = document.getElementById("battle-loading-screen");
         loadingScreen.classList.remove("show");
@@ -2529,14 +3113,20 @@
           document.getElementById("no-battle").classList.add("show");
         }
       } finally {
-        if (sourceBtn) sourceBtn.disabled = false;
+        if (sourceBtn) {
+          sourceBtn.dataset.processing = "false";
+        }
+        updateEnergyState();
       }
     }
 
     async function restartBattle() {
       const retryBtn = document.getElementById("retry-btn");
-      if (retryBtn.disabled || !battle) return;
+      if (!retryBtn || retryBtn.disabled || !battle) return;
+
       retryBtn.disabled = true;
+      retryBtn.dataset.processing = "true";
+
       try {
         const payload = await apiRequest("/battle/restart", {
           method: "POST", body: JSON.stringify({ battle_id: battle.id })
@@ -2550,6 +3140,8 @@
         setPlayerInfo();
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
+        state.crit_damage = 0;
+        state.playerDamageTaken = 0;
         battleSeed = Number(battle.seed || 0) >>> 0;
         apiReady = true;
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
@@ -2565,9 +3157,18 @@
         beginBattle();
       } catch (error) {
         console.error("[battle] restart failed:", error);
-        showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344");
+
+        const errorMsg = error.message || "";
+        if (errorMsg.includes("Not enough energy") || errorMsg.includes("energy") || errorMsg.includes("409")) {
+          showNotification("НЕДОСТАТОЧНО ЭНЕРГИИ", "#e95732", 0);
+        } else {
+          showNotification("НЕ УДАЛОСЬ НАЧАТЬ", "#ff3344", 0);
+        }
       } finally {
-        retryBtn.disabled = false;
+        if (retryBtn) {
+          retryBtn.dataset.processing = "false";
+        }
+        updateEnergyState();
       }
     }
 
