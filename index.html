@@ -1474,6 +1474,41 @@
       line-height: 1;
       pointer-events: none;
     }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: #63b85b;
+      margin-left: 2px;
+      animation: cursorBlink 0.8s infinite;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes cursorBlink {
+
+      0%,
+      49% {
+        opacity: 1;
+      }
+
+      50%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .m-desc {
+      min-height: 48px;
+    }
+
+    .monster-encounter {
+      min-height: 180px;
+    }
+
+    .m-name {
+      min-height: 24px;
+    }
   </style>
 </head>
 
@@ -1582,10 +1617,9 @@
               <span class="m-desc" id="dossier-desc"></span>
             </div>
           </div>
-        </div>
-
-        <div class="encounter-actions">
-          <button id="start-battle-btn">НА ОХОТУ!</button>
+          <div class="encounter-actions">
+            <button id="start-battle-btn">НА ОХОТУ!</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1838,11 +1872,14 @@
     }
 
     function showLoadedBattleScreen() {
-      setTimeout(() => {
-        document.getElementById("game").classList.remove("battle-awaiting");
-        document.getElementById("game").classList.add("battle-ready");
-        document.getElementById("battle-loading-screen").classList.add("hidden");
-      }, 1000);
+      return new Promise(resolve => {
+        setTimeout(() => {
+          document.getElementById("game").classList.remove("battle-awaiting");
+          document.getElementById("game").classList.add("battle-ready");
+          document.getElementById("battle-loading-screen").classList.add("hidden");
+          resolve();
+        }, 1000);
+      });
     }
 
     async function loadBattle() {
@@ -1872,7 +1909,6 @@
         }
 
         setLoadingProgress(68);
-        showLoadedBattleScreen();
 
         setLoadingProgress(78);
 
@@ -2259,6 +2295,72 @@
       haptic([30, 20, 40, 25, 55]);
     }
 
+    function typewriterSound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const osc = state.audio.createOscillator();
+      const gain = state.audio.createGain();
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(800 + Math.random() * 200, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+
+      gain.gain.setValueAtTime(0.015, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+      osc.connect(gain);
+      gain.connect(state.audio.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.04);
+    }
+
+    async function typewriterEffect(element, text, speed = 30) {
+      if (!element) return;
+
+      element.style.opacity = '0';
+      element.style.transition = 'none';
+      element.textContent = text;
+
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const requiredHeight = element.offsetHeight;
+      const requiredWidth = element.offsetWidth;
+
+      element.style.minHeight = requiredHeight + 'px';
+      element.style.minWidth = requiredWidth + 'px';
+      element.textContent = '';
+
+      element.style.opacity = '';
+      element.style.transition = '';
+
+      const cursor = document.createElement('span');
+      cursor.className = 'typewriter-cursor';
+      element.appendChild(cursor);
+
+      for (let i = 0; i < text.length; i++) {
+        const char = document.createTextNode(text[i]);
+        element.insertBefore(char, cursor);
+        element.appendChild(cursor);
+
+        if (state.soundEnabled && state.audio) {
+          typewriterSound();
+        }
+
+        await new Promise(resolve => setTimeout(resolve, speed));
+      }
+    }
+
+    async function startDescriptionTypewriter() {
+      const mDesc = tg_data.monster_desc || "[ДАННЫЕ УДАЛЕНЫ]";
+      const descEl = document.getElementById("dossier-desc");
+
+      if (descEl) {
+        await typewriterEffect(descEl, mDesc, 25);
+      }
+    }
+
     function deathFlash() {
       flashOverlay.style.background = "#ff6644";
       flashOverlay.classList.remove("flash");
@@ -2551,11 +2653,11 @@
 
       if (tg_data) {
         const mName = tg_data.monster_name || "[ДАННЫЕ УДАЛЕНЫ]";
-        const mDesc = tg_data.monster_desc || "[ДАННЫЕ УДАЛЕНЫ]";
         const nameEl = document.getElementById("dossier-name");
         const descEl = document.getElementById("dossier-desc");
+
         if (nameEl) nameEl.textContent = mName;
-        if (descEl) descEl.innerHTML = mDesc;
+        if (descEl) descEl.textContent = '';
       }
 
       state.playerHearts = 3;
@@ -2576,7 +2678,6 @@
       if (!apiReady || !battle) return;
       state.sessionStartedAt = Date.now();
       gameLog("start", { battle_id: battle.id, game_mode: "slider", hp: state.enemyMaxHP });
-      initAudio(); state.audio?.resume();
       battleStartOverlay.classList.remove("show");
 
       sliderMonster.style.opacity = "0.7";
@@ -2971,9 +3072,6 @@
         void victoryTitle.offsetWidth;
         victoryTitle.classList.add("celebrate");
       }
-
-      initAudio();
-      state.audio?.resume();
       victorySound();
 
       const mainMoney = (tg_data && Number(tg_data.money_drop)) || 0;
@@ -3111,11 +3209,12 @@
 
         await new Promise(r => setTimeout(r, 300));
 
-        startGame();
+        loadingScreen.classList.remove("show");
 
-        setTimeout(() => {
-          loadingScreen.classList.remove("show");
-        }, 200);
+        await new Promise(r => setTimeout(r, 250));
+
+        startGame();
+        await startDescriptionTypewriter();
 
       } catch (error) {
         console.error("[battle] start new battle failed:", error);
@@ -3177,6 +3276,7 @@
         }
         gameOverOverlay.classList.remove("show");
         startGame();
+        await startDescriptionTypewriter();
         beginBattle();
       } catch (error) {
         console.error("[battle] restart failed:", error);
@@ -3230,13 +3330,21 @@
       }
     }
 
+    initAudio();
+    if (state.audio) {
+      state.audio.resume();
+    }
     setupEventListeners();
     startTelemetry();
 
     (async () => {
       await loadEnvConfig();
       const loaded = await loadBattle();
-      if (loaded) startGame();
+      if (loaded) {
+        await showLoadedBattleScreen();
+        startGame();
+        await startDescriptionTypewriter();
+      }
     })();
 
     document.addEventListener("visibilitychange", () => {
