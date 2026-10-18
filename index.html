@@ -2295,83 +2295,79 @@
       haptic([30, 20, 40, 25, 55]);
     }
 
-    function typewriterSound() {
+    function typewriterSound(variation = {}) {
       if (!state.audio || !state.soundEnabled) return;
+
       const now = state.audio.currentTime;
+
+      const duration = variation.duration ?? 0.04;
+      const startFreq = variation.startFreq ?? 380;
+      const endFreq = variation.endFreq ?? 260;
+      const gainValue = variation.gain ?? 0.015;
+      const wave = variation.wave ?? "triangle";
 
       const osc = state.audio.createOscillator();
       const gain = state.audio.createGain();
 
-      osc.type = "square";
-      osc.frequency.setValueAtTime(800 + Math.random() * 200, now);
-      osc.frequency.exponentialRampToValueAtTime(600, now + 0.02);
+      osc.type = wave;
 
-      gain.gain.setValueAtTime(0.015, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.frequency.setValueAtTime(startFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(
+        endFreq,
+        now + duration * 0.6
+      );
+
+      gain.gain.setValueAtTime(gainValue, now);
+      gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        now + duration
+      );
 
       osc.connect(gain);
       gain.connect(state.audio.destination);
 
       osc.start(now);
-      osc.stop(now + 0.04);
+      osc.stop(now + duration + 0.01);
     }
 
-    function buttonHoverSound() {
-      if (!state.audio || !state.soundEnabled) return;
-      const now = state.audio.currentTime;
+    function typewriterSequence(kind = "click") {
+      if (!state.soundEnabled) return;
 
-      const osc = state.audio.createOscillator();
-      const gain = state.audio.createGain();
+      initAudio();
+      if (!state.audio) return;
 
-      const freqBase = 600 + Math.random() * 400;
-      const duration = 0.015 + Math.random() * 0.015;
+      state.audio.resume?.();
 
-      osc.type = "square";
-      osc.frequency.setValueAtTime(freqBase, now);
-      osc.frequency.exponentialRampToValueAtTime(freqBase * 0.7, now + duration);
+      const count = kind === "hover"
+        ? (Math.random() < 0.65 ? 1 : 2)
+        : (Math.random() < 0.35 ? 1 : 2);
 
-      gain.gain.setValueAtTime(0.008, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration * 1.5);
+      const gap = kind === "hover" ? 28 : 35;
 
-      osc.connect(gain);
-      gain.connect(state.audio.destination);
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          if (!state.soundEnabled || !state.audio) return;
 
-      osc.start(now);
-      osc.stop(now + duration * 1.8);
-    }
+          typewriterSound({
+            startFreq: 480 + Math.random() * 100,
+            endFreq: 360 + Math.random() * 50,
 
-    function buttonClickSound() {
-      if (!state.audio || !state.soundEnabled) return;
-      const now = state.audio.currentTime;
+            duration: kind === "hover"
+              ? 0.025 + Math.random() * 0.015
+              : 0.035 + Math.random() * 0.015,
 
-      const clicks = 1 + Math.floor(Math.random() * 2);
+            gain: kind === "hover"
+              ? 0.007 + Math.random() * 0.005
+              : 0.014 + Math.random() * 0.007,
 
-      for (let i = 0; i < clicks; i++) {
-        const clickTime = now + (i * 0.04);
-
-        const osc = state.audio.createOscillator();
-        const gain = state.audio.createGain();
-
-        const freqBase = 800 + Math.random() * 600;
-        const duration = 0.02 + Math.random() * 0.01;
-        const volume = 0.025 + Math.random() * 0.015;
-
-        osc.type = "square";
-        osc.frequency.setValueAtTime(freqBase, clickTime);
-        osc.frequency.exponentialRampToValueAtTime(freqBase * 0.6, clickTime + duration);
-
-        gain.gain.setValueAtTime(0.0001, clickTime);
-        gain.gain.exponentialRampToValueAtTime(volume, clickTime + 0.002);
-        gain.gain.exponentialRampToValueAtTime(0.001, clickTime + duration * 1.2);
-
-        osc.connect(gain);
-        gain.connect(state.audio.destination);
-
-        osc.start(clickTime);
-        osc.stop(clickTime + duration * 2.5);
+            wave: "triangle"
+          });
+        }, i * gap);
       }
 
-      haptic([3, 2, 3]);
+      if (kind === "click") {
+        haptic([3, 2, 3]);
+      }
     }
 
     async function typewriterEffect(element, text, speed = 30) {
@@ -3364,24 +3360,17 @@
     function setupEventListeners() {
       const zone = document.getElementById("input-zone");
 
-      document.addEventListener('mouseover', (e) => {
-        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
-          buttonHoverSound();
-        }
+      document.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("mouseenter", () => {
+          if (button.disabled) return;
+          typewriterSequence("hover");
+        });
+
+        button.addEventListener("pointerdown", () => {
+          if (button.disabled) return;
+          typewriterSequence("click");
+        });
       });
-
-      document.addEventListener('pointerdown', (e) => {
-        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
-          buttonClickSound();
-        }
-      });
-
-      document.addEventListener('touchstart', (e) => {
-        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
-          buttonClickSound();
-        }
-      }, { passive: true });
-
 
       zone.addEventListener("pointerdown", e => {
         e.preventDefault();
