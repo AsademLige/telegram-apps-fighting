@@ -2316,6 +2316,64 @@
       osc.stop(now + 0.04);
     }
 
+    function buttonHoverSound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const osc = state.audio.createOscillator();
+      const gain = state.audio.createGain();
+
+      const freqBase = 600 + Math.random() * 400;
+      const duration = 0.015 + Math.random() * 0.015;
+
+      osc.type = "square";
+      osc.frequency.setValueAtTime(freqBase, now);
+      osc.frequency.exponentialRampToValueAtTime(freqBase * 0.7, now + duration);
+
+      gain.gain.setValueAtTime(0.008, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration * 1.5);
+
+      osc.connect(gain);
+      gain.connect(state.audio.destination);
+
+      osc.start(now);
+      osc.stop(now + duration * 1.8);
+    }
+
+    function buttonClickSound() {
+      if (!state.audio || !state.soundEnabled) return;
+      const now = state.audio.currentTime;
+
+      const clicks = 1 + Math.floor(Math.random() * 2);
+
+      for (let i = 0; i < clicks; i++) {
+        const clickTime = now + (i * 0.04);
+
+        const osc = state.audio.createOscillator();
+        const gain = state.audio.createGain();
+
+        const freqBase = 800 + Math.random() * 600;
+        const duration = 0.02 + Math.random() * 0.01;
+        const volume = 0.025 + Math.random() * 0.015;
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(freqBase, clickTime);
+        osc.frequency.exponentialRampToValueAtTime(freqBase * 0.6, clickTime + duration);
+
+        gain.gain.setValueAtTime(0.0001, clickTime);
+        gain.gain.exponentialRampToValueAtTime(volume, clickTime + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, clickTime + duration * 1.2);
+
+        osc.connect(gain);
+        gain.connect(state.audio.destination);
+
+        osc.start(clickTime);
+        osc.stop(clickTime + duration * 2.5);
+      }
+
+      haptic([3, 2, 3]);
+    }
+
     async function typewriterEffect(element, text, speed = 30) {
       if (!element) return;
 
@@ -3254,19 +3312,23 @@
           method: "POST", body: JSON.stringify({ battle_id: battle.id })
         });
         if (!payload.battle) throw new Error("Battle restart returned no battle");
+
         battle = payload.battle;
         if (battle && "data" in battle) {
           tg_data = parseBattleData(battle.data);
         }
         tg_data.user = payload.user;
         setPlayerInfo();
+
         state.enemyMaxHP = Number(tg_data.monster_hp);
         state.enemyHP = state.enemyMaxHP;
         state.crit_damage = 0;
         state.playerDamageTaken = 0;
         battleSeed = Number(battle.seed || 0) >>> 0;
         apiReady = true;
+
         document.getElementById("enemy-label").innerText = tg_data.monster_name || "Противник";
+
         sliderMonster.onerror = function () {
           this.onerror = null;
           this.src = "assets/default.png";
@@ -3274,13 +3336,16 @@
         if (tg_data.monster_id != null) {
           sliderMonster.src = `assets/${tg_data.monster_id}.png`;
         }
+
         gameOverOverlay.classList.remove("show");
+
         startGame();
-        await startDescriptionTypewriter();
+
+        battleStartOverlay.classList.remove("show");
         beginBattle();
+
       } catch (error) {
         console.error("[battle] restart failed:", error);
-
         const errorMsg = error.message || "";
         if (errorMsg.includes("Not enough energy") || errorMsg.includes("energy") || errorMsg.includes("409")) {
           showNotification("НЕДОСТАТОЧНО ЭНЕРГИИ", "#e95732", 0);
@@ -3298,10 +3363,31 @@
     // ==================== EVENTS ====================
     function setupEventListeners() {
       const zone = document.getElementById("input-zone");
+
+      document.addEventListener('mouseover', (e) => {
+        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
+          buttonHoverSound();
+        }
+      });
+
+      document.addEventListener('pointerdown', (e) => {
+        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
+          buttonClickSound();
+        }
+      });
+
+      document.addEventListener('touchstart', (e) => {
+        if (e.target.tagName === 'BUTTON' && !e.target.disabled) {
+          buttonClickSound();
+        }
+      }, { passive: true });
+
+
       zone.addEventListener("pointerdown", e => {
         e.preventDefault();
         resolveSliderHit(e);
       });
+
       document.addEventListener("keydown", e => {
         if (e.code !== "Space") return;
         if (battleStartOverlay.classList.contains("show")) return;
