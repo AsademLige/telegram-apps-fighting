@@ -2979,7 +2979,13 @@
       const cyclePhase = (elapsedWithOffset % totalCycle) / travelTime;
       const pos = cyclePhase <= 1 ? cyclePhase : 2 - cyclePhase;
 
-      const zoneIndex = state.slider.zones.findIndex(z => !z.hit && pos >= z.left && pos <= z.right);
+      const toleranceRatio = sliderConfig.hit_tolerance;
+
+      const zoneIndex = state.slider.zones.findIndex(z =>
+        !z.hit &&
+        pos >= (z.left - toleranceRatio) &&
+        pos <= (z.right + toleranceRatio)
+      );
 
       gameLog("tap", {
         input_seq: inputSeq, input_kind: inputKind, input_age_ms: tapInputAge, input_trusted: inputTrusted,
@@ -3058,7 +3064,8 @@
 
       const center = (z.left + z.right) / 2;
       const half = z.width / 2;
-      const accuracy = Math.max(0, 1 - Math.abs(pos - center) / half);
+      const effectiveHalf = half + toleranceRatio;
+      const accuracy = Math.max(0, 1 - Math.abs(pos - center) / effectiveHalf);
 
       const comboBonus = state.combo * sliderConfig.combo_bonus_damage;
       const baseDamage = Math.round(sliderConfig.damageYellow + (sliderConfig.damageGreen - sliderConfig.damageYellow) * accuracy);
