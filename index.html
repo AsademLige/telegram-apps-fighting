@@ -1700,6 +1700,10 @@
 
   <script>
     const tg = window.Telegram.WebApp;
+    const startParamChatId = (() => {
+      const parsed = Number.parseInt(tg?.initDataUnsafe?.start_param || "", 10);
+      return Number.isSafeInteger(parsed) ? parsed : null;
+    })();
     tg.ready(); tg.expand();
 
     window.BATTLE_API_URL = window.BATTLE_API_URL || "https://jesterapi.ddns.net";
@@ -3218,7 +3222,10 @@
         loaderState.target = 0;
         setLoadingProgress(10);
 
-        const payload = await apiRequest("/battle/new", { method: "POST" });
+        const payload = await apiRequest("/battle/new", {
+          method: "POST",
+          body: JSON.stringify(startParamChatId !== null ? { chat_id: startParamChatId } : {})
+        });
         if (!payload.battle) throw new Error("No battle returned from API");
 
         setLoadingProgress(40);
