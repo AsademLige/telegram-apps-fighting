@@ -200,9 +200,16 @@
       height: 76dvh;
       position: relative;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
       touch-action: none;
+    }
+
+    #monster-area {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      position: relative;
     }
 
     #enemy-section {
@@ -410,9 +417,11 @@
     #slider-monster {
       position: absolute;
       left: 50%;
-      top: 5%;
+      top: 50%;
       width: min(58vw, 440px);
       height: min(58vw, 440px);
+      max-width: 100%;
+      max-height: 100%;
       transform: translate(-50%, -50%);
       object-fit: contain;
       pointer-events: none;
@@ -505,6 +514,7 @@
       flex-direction: column;
       gap: 14px;
       padding: 0 6px;
+      margin-bottom: 36px;
       position: relative;
       z-index: 2;
     }
@@ -1290,6 +1300,29 @@
       text-shadow: 2px 2px 0 #07120d;
     }
 
+    .boss-title {
+      display: none;
+      color: #e95732;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-align: center;
+      text-shadow: 2px 2px 0 #07120d;
+    }
+
+    .boss-title.visible {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .boss-title .boss-warn {
+      transform: translateY(-5px);
+      font-size: 1.6em;
+      line-height: 1;
+    }
+
     .m-desc {
       color: #9eaf86;
       font-size: 11px;
@@ -1320,6 +1353,11 @@
 
       .m-name {
         font-size: 14px;
+      }
+
+      .boss-title {
+        font-size: 18px;
+        letter-spacing: 2px;
       }
 
       .m-desc {
@@ -1559,7 +1597,9 @@
     </div>
 
     <div id="input-zone">
-      <img id="slider-monster" alt="" />
+      <div id="monster-area">
+        <img id="slider-monster" alt="" />
+      </div>
       <div id="slider-game">
         <div id="slider-title"></div>
         <div id="slider-track">
@@ -1608,6 +1648,8 @@
         <div class="dossier-pin"></div>
         <div id="monster-encounter-info" class="monster-encounter">
           <div class="encounter-content">
+            <div class="boss-title" id="dossier-boss"><span class="boss-warn">⚠</span>[БОСС]<span
+                class="boss-warn">⚠</span></div>
             <div class="dossier-row">
               <span class="dossier-label">[ИМЯ]:</span>
               <span class="m-name" id="dossier-name"></span>
@@ -2713,9 +2755,11 @@
         const mName = tg_data.monster_name || "[ДАННЫЕ УДАЛЕНЫ]";
         const nameEl = document.getElementById("dossier-name");
         const descEl = document.getElementById("dossier-desc");
+        const bossEl = document.getElementById("dossier-boss");
 
         if (nameEl) nameEl.textContent = mName;
         if (descEl) descEl.textContent = '';
+        if (bossEl) bossEl.classList.toggle("visible", !!tg_data.is_boss);
       }
 
       state.playerHearts = 3;
